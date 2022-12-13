@@ -1,0 +1,19 @@
+repositories {
+    maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+}
+
+dependencies {
+    implementation project(':common')
+
+    compileOnly 'org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT'
+}
+
+tasks.shadowJar {
+    archiveFileName = 'CommandFramework [' + project.version + '].jar'
+}
+
+artifacts.archives(tasks.shadowJar)
+
+tasks.jar {
+    enabled = false
+}
