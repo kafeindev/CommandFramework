@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'maven-publish'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    group 'com.mineles.commands'
+    version '1.0.0'
+
+    sourceCompatibility = 8
+    targetCompatibility = 8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    repositories {
+        mavenCentral()
+
+        maven { url = 'https://jitpack.io' }
+    }
+
+    dependencies {
+        compileOnly 'com.google.guava:guava:31.1-jre'
+        compileOnly 'org.jetbrains:annotations:23.0.0'
+    }
+}
+
+publishing {
+    publications {
+        shadow(MavenPublication) {
+            from components.java
+        }
+    }
+}

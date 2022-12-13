@@ -1,0 +1,6 @@
+rootProject.name = 'CommandFramework'
+include 'common'
+include 'bukkit'
+include 'discord'
+include 'jda'
+
