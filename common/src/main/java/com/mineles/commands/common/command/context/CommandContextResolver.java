@@ -57,7 +57,7 @@ public final class CommandContextResolver<T> {
             if (handledContext == null) {
                 return null;
             } else {
-                if (!(type.equals(SenderComponent.class) || type.equals(String[].class))) {
+                if (!(SenderComponent.class.isAssignableFrom(type) || type.equals(String[].class))) {
                     argIndex++;
                 }
                 result[i] = handledContext;

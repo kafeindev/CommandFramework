@@ -1,6 +1,7 @@
 package com.mineles.commands.jda.context;
 
 import com.mineles.commands.common.command.context.CommandContextProvider;
+import com.mineles.commands.jda.component.JDASenderComponent;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
@@ -8,6 +9,7 @@ public final class JDACommandContextProvider extends CommandContextProvider<Opti
 
     @Override
     public void initialize() {
+        put(JDASenderComponent.class, (sender, args, value, parameter) -> sender);
         put(OptionMapping.class, (sender, args, value, parameter) -> value);
 
         put(User.class, (sender, args, value, parameter) -> value.getAsUser());

@@ -6,7 +6,6 @@ import com.mineles.commands.common.command.abstraction.ParentCommand;
 import com.mineles.commands.common.component.SenderComponent;
 import com.mineles.commands.jda.component.JDASenderComponent;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -35,9 +34,7 @@ public final class JDACommandExecutor extends ListenerAdapter {
         String commandName = event.getName();
         if (!command.containsAlias(commandName)) return;
 
-        TextChannel channel = event.getTextChannel();
-        SenderComponent sender = new JDASenderComponent(member, channel);
-
+        SenderComponent sender = new JDASenderComponent(member, event);
         OptionMapping[] args = event.getOptions().toArray(new OptionMapping[0]);
 
         if (event.getSubcommandName() == null || !command.findChild(event.getSubcommandName()).isPresent()) {

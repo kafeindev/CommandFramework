@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,11 +15,11 @@ import java.util.UUID;
 public final class JDASenderComponent implements SenderComponent {
 
     private final Member member;
-    private final TextChannel channel;
+    private final SlashCommandInteractionEvent event;
 
-    public JDASenderComponent(@NotNull Member member, @NotNull TextChannel channel) {
+    public JDASenderComponent(@NotNull Member member, @NotNull SlashCommandInteractionEvent event) {
         this.member = member;
-        this.channel = channel;
+        this.event = event;
     }
 
     @Override
@@ -34,7 +34,7 @@ public final class JDASenderComponent implements SenderComponent {
 
     @Override
     public void sendMessage(@NotNull String message) {
-        Message jdaMessage = this.channel.sendMessage(message).complete();
+        Message jdaMessage = this.event.getTextChannel().sendMessage(message).complete();
 
         jdaMessage.delete().queueAfter(5, java.util.concurrent.TimeUnit.SECONDS);
     }
@@ -59,6 +59,11 @@ public final class JDASenderComponent implements SenderComponent {
     @Override
     public boolean isPlayer() {
         return true;
+    }
+
+    @NotNull
+    public SlashCommandInteractionEvent getEvent() {
+        return event;
     }
 
     @NotNull

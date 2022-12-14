@@ -93,7 +93,7 @@ public abstract class AbstractCommand<T> {
         int availableArgument = 0;
         for (Parameter parameter : parameters) {
             Class<?> type = parameter.getType();
-            if (type.equals(SenderComponent.class) || type.equals(String[].class)) {
+            if (SenderComponent.class.isAssignableFrom(type) || type.equals(String[].class)) {
                 continue;
             }
 
