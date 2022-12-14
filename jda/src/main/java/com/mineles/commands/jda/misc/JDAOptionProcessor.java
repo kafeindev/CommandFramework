@@ -1,7 +1,6 @@
 package com.mineles.commands.jda.misc;
 
 import com.google.common.collect.ImmutableList;
-import com.mineles.commands.common.command.BaseCommand;
 import com.mineles.commands.jda.annotation.JDACommandCompletion;
 import com.mineles.commands.jda.annotation.JDACommandCompletions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -9,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,13 +23,11 @@ public final class JDAOptionProcessor {
     }
 
     @NotNull
-    public static OptionData[] process(@NotNull BaseCommand baseCommand) {
-        Class<?> clazz = baseCommand.getClass();
-
+    public static OptionData[] process(@NotNull Method method) {
         List<JDACommandCompletion> completions = new ArrayList<>();
 
         ANNOTATIONS.forEach(annotationClass -> {
-            Annotation annotation = clazz.getAnnotation(annotationClass);
+            Annotation annotation = method.getAnnotation(annotationClass);
             if (annotation == null) {
                 return;
             }

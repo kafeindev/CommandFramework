@@ -134,11 +134,11 @@ public final class CommandBuilder {
         );
     }
 
-    public AbstractCommand build() {
-        CommandAttribute attribute = this.buildAttribute();
+    public AbstractCommand<?> build() {
+        CommandAttribute attribute = buildAttribute();
 
         return this.isParent
-                ? new ParentCommand(this.baseCommand, this.executor, attribute, this.completions)
-                : new ChildCommand(this.baseCommand, this.executor, attribute, this.completions);
+                ? new ParentCommand<>(this.baseCommand, this.executor, attribute, this.completions)
+                : new ChildCommand<>(this.baseCommand, this.executor, attribute, this.completions);
     }
 }

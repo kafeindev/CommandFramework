@@ -57,7 +57,7 @@ public final class CommandAttribute {
         this.permissionMessage = permissionMessage;
 
         this.usage = usage == null ? "/" + aliases[0] : usage;
-        this.description = description == null ? usage : description;
+        this.description = description == null ? "No description provided" : description;
     }
 
     @NotNull

@@ -24,30 +24,140 @@
 
 package com.mineles.commands.bukkit;
 
-import com.mineles.commands.common.command.context.CommandContext;
 import com.mineles.commands.common.command.context.CommandContextProvider;
-import com.mineles.commands.common.component.SenderComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Parameter;
-
-public final class BukkitCommandContextProvider extends CommandContextProvider {
+public final class BukkitCommandContextProvider extends CommandContextProvider<String> {
 
     @Override
     public void initialize() {
-        register(new CommandContext(Player.class) {
-            @Override
-            public Object handle(@NotNull SenderComponent sender, @NotNull String[] args,
-                                 @NotNull String value, @NotNull Parameter parameter) {
-                Player target = Bukkit.getServer().getPlayer(value);
-                if (target == null) {
-                    sender.sendMessage("§cPlayer " + value + " not found.");
-                    return null;
-                }
+        put(Player.class, (sender, args, value, parameter) -> {
+            Player target = Bukkit.getServer().getPlayer(value);
+            if (target == null) {
+                sender.sendMessage("§cPlayer " + value + " not found.");
+                return null;
+            }
 
-                return target;
+            return target;
+        });
+
+        put(Enum.class, (sender, args, value, parameter) -> {
+            Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) parameter.getType();
+            for (Enum<?> e : enumClass.getEnumConstants()) {
+                if (e.name().equalsIgnoreCase(value)) {
+                    return e;
+                }
+            }
+
+            sender.sendMessage("§cInvalid value: " + value);
+            return null;
+        });
+
+        put(char.class, (sender, args, value, parameter) -> value.length() == 1 ? value.charAt(0) : null);
+
+        put(boolean.class, (sender, args, value, parameter) -> Boolean.parseBoolean(value));
+        put(Boolean.class, (sender, args, value, parameter) -> Boolean.parseBoolean(value));
+
+        put(byte.class, (sender, args, value, parameter) -> {
+            try {
+                return Byte.parseByte(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+        put(Byte.class, (sender, args, value, parameter) -> {
+            try {
+                return Byte.parseByte(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+
+        put(short.class, (sender, args, value, parameter) -> {
+            try {
+                return Short.parseShort(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+        put(Short.class, (sender, args, value, parameter) -> {
+            try {
+                return Short.parseShort(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+
+        put(int.class, (sender, args, value, parameter) -> {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+        put(Integer.class, (sender, args, value, parameter) -> {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+
+        put(long.class, (sender, args, value, parameter) -> {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+        put(Long.class, (sender, args, value, parameter) -> {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+
+        put(float.class, (sender, args, value, parameter) -> {
+            try {
+                return Float.parseFloat(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+        put(Float.class, (sender, args, value, parameter) -> {
+            try {
+                return Float.parseFloat(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+
+        put(double.class, (sender, args, value, parameter) -> {
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
+            }
+        });
+        put(Double.class, (sender, args, value, parameter) -> {
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid number: " + value);
+                return null;
             }
         });
     }

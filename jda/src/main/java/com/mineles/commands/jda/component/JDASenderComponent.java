@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,11 +15,11 @@ import java.util.UUID;
 public final class JDASenderComponent implements SenderComponent {
 
     private final Member member;
-    private final MessageChannel channel;
+    private final TextChannel channel;
 
-    public JDASenderComponent(@NotNull Member member, @NotNull MessageChannel messageChannel) {
+    public JDASenderComponent(@NotNull Member member, @NotNull TextChannel channel) {
         this.member = member;
-        this.channel = messageChannel;
+        this.channel = channel;
     }
 
     @Override
@@ -59,5 +59,10 @@ public final class JDASenderComponent implements SenderComponent {
     @Override
     public boolean isPlayer() {
         return true;
+    }
+
+    @NotNull
+    public Member getMember() {
+        return this.member;
     }
 }

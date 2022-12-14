@@ -30,21 +30,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Parameter;
 
-public abstract class CommandContext {
-
-    @NotNull
-    private final Class<?> clazz;
-
-    protected CommandContext(@NotNull Class<?> clazz) {
-        this.clazz = clazz;
-    }
+public interface CommandContext<T> {
 
     @Nullable
-    public abstract Object handle(@NotNull SenderComponent sender, @NotNull String[] args,
-                                  @NotNull String value, @NotNull Parameter parameter);
+    Object handle(@NotNull SenderComponent sender, @NotNull T[] args,
+                  @NotNull T value, @NotNull Parameter parameter);
 
-    @NotNull
-    public Class<?> getClazz() {
-        return this.clazz;
-    }
 }

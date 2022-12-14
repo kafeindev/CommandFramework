@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 
-public final class ChildCommand extends AbstractCommand {
+public final class ChildCommand<T> extends AbstractCommand<T> {
 
     public ChildCommand(@NotNull BaseCommand baseCommand, @NotNull Method executor,
                         @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {

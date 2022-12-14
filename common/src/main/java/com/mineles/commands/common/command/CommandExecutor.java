@@ -37,12 +37,12 @@ import java.util.List;
 
 public interface CommandExecutor {
 
-    default void execute(@NotNull CommandManager manager,
-                         @NotNull ParentCommand command, @NotNull SenderComponent sender,
+    default void execute(@NotNull CommandManager<String> manager,
+                         @NotNull ParentCommand<String> command, @NotNull SenderComponent sender,
                          @NotNull String label, @NotNull String[] args) {
         if (!command.containsAlias(label)) return;
 
-        CommandContextResolver contextResolver = manager.getContextResolver();
+        CommandContextResolver<String> contextResolver = manager.getContextResolver();
         if (args.length == 0 || !command.findChild(args[0]).isPresent()) {
             command.execute(sender, contextResolver, args);
         } else {
@@ -51,13 +51,13 @@ public interface CommandExecutor {
                 return;
             }
 
-            ChildCommand childCommand = command.findChild(args[0]).get();
+            ChildCommand<String> childCommand = command.findChild(args[0]).get();
             childCommand.execute(sender, contextResolver, resolveArgs(args));
         }
     }
 
     @Nullable
-    default List<String> tabComplete(@NotNull CommandManager manager, @NotNull ParentCommand command,
+    default List<String> tabComplete(@NotNull CommandManager<String> manager, @NotNull ParentCommand<String> command,
                                      @NotNull SenderComponent sender, @NotNull String[] args) {
         if (args.length == 1) return command.findAllChildAliases();
         if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
@@ -65,7 +65,7 @@ public interface CommandExecutor {
         }
 
         try {
-            ChildCommand childCommand = command.findChild(args[0]).orElse(null);
+            ChildCommand<String> childCommand = command.findChild(args[0]).orElse(null);
             if (childCommand.getPermission() != null && !sender.hasPermission(childCommand.getPermission())) {
                 return null;
             }

@@ -12,8 +12,5 @@ tasks.shadowJar {
     archiveFileName = 'CommandFramework [' + project.version + '].jar'
 }
 
-artifacts.archives(tasks.shadowJar)
-
-tasks.jar {
-    enabled = false
-}
+compileJava.dependsOn clean
+build.dependsOn shadowJar

@@ -1,15 +1,12 @@
 dependencies {
     implementation project(':common')
 
-    compileOnly 'net.dv8tion:JDA:5.0.0-beta.2'
+    compileOnly 'net.dv8tion:JDA:5.0.0-alpha.11'
 }
 
 tasks.shadowJar {
     archiveFileName = 'CommandFramework [' + project.version + '].jar'
 }
 
-artifacts.archives(tasks.shadowJar)
-
-tasks.jar {
-    enabled = false
-}
+compileJava.dependsOn clean
+build.dependsOn shadowJar

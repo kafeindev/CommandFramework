@@ -38,12 +38,12 @@ import java.util.List;
 public final class BukkitCommandExecutor extends BukkitCommand implements CommandExecutor {
 
     @NotNull
-    private final CommandManager manager;
+    private final CommandManager<String> manager;
 
     @NotNull
-    private final ParentCommand command;
+    private final ParentCommand<String> command;
 
-    public BukkitCommandExecutor(@NotNull CommandManager manager, @NotNull ParentCommand command) {
+    public BukkitCommandExecutor(@NotNull CommandManager<String> manager, @NotNull ParentCommand<String> command) {
         super(command.getAliases()[0], command.getDescription(), command.getUsage(), Arrays.asList(command.getAliases()));
         this.command = command;
         this.manager = manager;

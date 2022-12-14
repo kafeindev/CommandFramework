@@ -36,7 +36,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
-public final class BukkitCommandManager extends CommandManager {
+public final class BukkitCommandManager extends CommandManager<String> {
 
     @NotNull
     private final Plugin plugin;
@@ -52,7 +52,7 @@ public final class BukkitCommandManager extends CommandManager {
     }
 
     @Override
-    public void initializeRegisteredCommand(@NotNull ParentCommand command) {
+    public void initializeRegisteredCommand(@NotNull ParentCommand<String> command) {
         BukkitCommandExecutor executor = new BukkitCommandExecutor(this, command);
 
         String fallBackPrefix = this.plugin.getName().toLowerCase(Locale.ROOT);

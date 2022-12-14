@@ -30,17 +30,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Parameter;
 
-public final class CommandContextResolver {
+public final class CommandContextResolver<T> {
 
     @NotNull
-    private final CommandContextProvider provider;
+    private final CommandContextProvider<T> provider;
 
-    public CommandContextResolver(@NotNull CommandContextProvider provider) {
+    public CommandContextResolver(@NotNull CommandContextProvider<T> provider) {
         this.provider = provider;
     }
 
     @Nullable
-    public Object[] resolve(@NotNull SenderComponent sender, @NotNull Parameter[] parameters, @NotNull String[] args) {
+    public Object[] resolve(@NotNull SenderComponent sender, @NotNull Parameter[] parameters, @NotNull T[] args) {
         Object[] result = new Object[parameters.length];
 
         int argIndex = 0;
@@ -48,12 +48,12 @@ public final class CommandContextResolver {
             Parameter parameter = parameters[i];
             Class<?> type = parameter.getType();
 
-            CommandContext context = this.provider.find(type)
+            CommandContext<T> context = this.provider.find(type)
                     .orElseThrow(() -> new IllegalArgumentException("Cannot find context for type " + type.getName()));
 
             Object handledContext = args.length > 0
                     ? context.handle(sender, args, args[argIndex], parameter)
-                    : context.handle(sender, new String[0], "", parameter);
+                    : null;
             if (handledContext == null) {
                 return null;
             } else {
@@ -68,7 +68,7 @@ public final class CommandContextResolver {
     }
 
     @NotNull
-    public CommandContextProvider getProvider() {
+    public CommandContextProvider<T> getProvider() {
         return this.provider;
     }
 }

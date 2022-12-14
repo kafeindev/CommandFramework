@@ -37,7 +37,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Optional;
 
-public abstract class AbstractCommand {
+public abstract class AbstractCommand<T> {
 
     @NotNull
     private final BaseCommand baseCommand;
@@ -61,7 +61,7 @@ public abstract class AbstractCommand {
 
     public abstract boolean isChild();
 
-    public void execute(@NotNull SenderComponent sender, @NotNull CommandContextResolver contextResolver, @NotNull String[] args) {
+    public void execute(@NotNull SenderComponent sender, @NotNull CommandContextResolver<T> contextResolver, @NotNull T[] args) {
         if (getPermission() != null && !sender.hasPermission(getPermission())) {
             sender.sendMessage(getPermissionMessage());
             return;
@@ -106,6 +106,11 @@ public abstract class AbstractCommand {
     @NotNull
     public BaseCommand getBaseCommand() {
         return this.baseCommand;
+    }
+
+    @NotNull
+    public Method getExecutor() {
+        return this.executor;
     }
 
     @NotNull
