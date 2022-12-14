@@ -5,7 +5,9 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,11 +17,11 @@ import java.util.UUID;
 public final class JDASenderComponent implements SenderComponent {
 
     private final Member member;
-    private final SlashCommandInteractionEvent event;
+    private final InteractionHook reply;
 
-    public JDASenderComponent(@NotNull Member member, @NotNull SlashCommandInteractionEvent event) {
+    public JDASenderComponent(@NotNull Member member, @NotNull InteractionHook reply) {
         this.member = member;
-        this.event = event;
+        this.reply = reply;
     }
 
     @Override
@@ -34,9 +36,18 @@ public final class JDASenderComponent implements SenderComponent {
 
     @Override
     public void sendMessage(@NotNull String message) {
-        Message jdaMessage = this.event.getTextChannel().sendMessage(message).complete();
+        sendMessage(message, true);
+    }
 
-        jdaMessage.delete().queueAfter(5, java.util.concurrent.TimeUnit.SECONDS);
+    public void sendMessage(@NotNull String message, boolean ephemeral) {
+        if (ephemeral) {
+            reply.setEphemeral(true).editOriginal(message).queue();
+        } else {
+            TextChannel channel = this.reply.getInteraction().getTextChannel();
+            Message jdaMessage = channel.sendMessage(message).complete();
+
+            jdaMessage.delete().queueAfter(5, java.util.concurrent.TimeUnit.SECONDS);
+        }
     }
 
     @Override
@@ -62,8 +73,8 @@ public final class JDASenderComponent implements SenderComponent {
     }
 
     @NotNull
-    public SlashCommandInteractionEvent getEvent() {
-        return event;
+    public InteractionHook getReply() {
+        return this.reply;
     }
 
     @NotNull

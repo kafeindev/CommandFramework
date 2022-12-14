@@ -8,7 +8,9 @@ import com.mineles.commands.jda.component.JDASenderComponent;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import org.jetbrains.annotations.NotNull;
 
 public final class JDACommandExecutor extends ListenerAdapter {
@@ -34,7 +36,9 @@ public final class JDACommandExecutor extends ListenerAdapter {
         String commandName = event.getName();
         if (!command.containsAlias(commandName)) return;
 
-        SenderComponent sender = new JDASenderComponent(member, event);
+        InteractionHook reply = event.deferReply().setEphemeral(true).complete();
+
+        SenderComponent sender = new JDASenderComponent(member, reply);
         OptionMapping[] args = event.getOptions().toArray(new OptionMapping[0]);
 
         if (event.getSubcommandName() == null || !command.findChild(event.getSubcommandName()).isPresent()) {
