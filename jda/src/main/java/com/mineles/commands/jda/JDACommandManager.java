@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 
-public final class JDACommandManager extends CommandManager <OptionMapping>{
+public final class JDACommandManager extends CommandManager<OptionMapping> {
 
     @NotNull
     private final JDA jda;
