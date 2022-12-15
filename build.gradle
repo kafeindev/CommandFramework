@@ -9,7 +9,7 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'com.github.johnrengelman.shadow'
 
-    group 'com.mineles.commands'
+    group 'net.mineles.commands'
     version '1.0.0'
 
     sourceCompatibility = 8
