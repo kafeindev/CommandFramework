@@ -25,7 +25,6 @@
 package net.mineles.commands.common.command.misc;
 
 import com.google.common.collect.ImmutableList;
-import com.mineles.commands.common.command.annotation.*;
 import net.mineles.commands.common.command.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

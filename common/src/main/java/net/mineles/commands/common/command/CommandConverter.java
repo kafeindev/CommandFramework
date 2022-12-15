@@ -26,7 +26,6 @@ package net.mineles.commands.common.command;
 
 import net.mineles.commands.common.command.abstraction.ChildCommand;
 import net.mineles.commands.common.command.abstraction.ParentCommand;
-import com.mineles.commands.common.command.annotation.*;
 import net.mineles.commands.common.command.annotation.*;
 import net.mineles.commands.common.component.SenderComponent;
 import org.jetbrains.annotations.NotNull;
