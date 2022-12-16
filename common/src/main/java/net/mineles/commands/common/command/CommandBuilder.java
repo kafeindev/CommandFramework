@@ -128,8 +128,8 @@ public final class CommandBuilder {
     private CommandAttribute buildAttribute() {
         return CommandAttribute.of(
                 this.aliases,
-                this.usage,
                 this.description,
+                this.usage,
                 this.permission,
                 this.permissionMessage
         );
