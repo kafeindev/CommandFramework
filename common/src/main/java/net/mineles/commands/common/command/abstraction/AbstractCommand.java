@@ -24,18 +24,22 @@
 
 package net.mineles.commands.common.command.abstraction;
 
+import com.google.common.collect.ImmutableList;
 import net.mineles.commands.common.command.BaseCommand;
 import net.mineles.commands.common.command.CommandAttribute;
 import net.mineles.commands.common.command.completion.RegisteredCompletion;
 import net.mineles.commands.common.command.context.CommandContextResolver;
 import net.mineles.commands.common.component.SenderComponent;
+import net.mineles.commands.common.predicates.DefaultParameterPredicates;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public abstract class AbstractCommand<T> {
 
@@ -93,7 +97,7 @@ public abstract class AbstractCommand<T> {
         int availableArgument = 0;
         for (Parameter parameter : parameters) {
             Class<?> type = parameter.getType();
-            if (SenderComponent.class.isAssignableFrom(type) || type.equals(String[].class)) {
+            if (DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type)) {
                 continue;
             }
 
