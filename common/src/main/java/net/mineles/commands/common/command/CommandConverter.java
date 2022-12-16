@@ -27,7 +27,7 @@ package net.mineles.commands.common.command;
 import net.mineles.commands.common.command.abstraction.ChildCommand;
 import net.mineles.commands.common.command.abstraction.ParentCommand;
 import net.mineles.commands.common.command.annotation.*;
-import net.mineles.commands.common.component.SenderComponent;
+import net.mineles.commands.common.reflect.ReflectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,20 +45,20 @@ final class CommandConverter<T> {
             throw new IllegalArgumentException("Class " + clazz.getName() + " has no annotations!");
         }
 
-        try {
-            CommandBuilder builder = CommandBuilder.newBuilder(baseCommand)
-                    .executor(clazz.getDeclaredMethod("execute", SenderComponent.class, String[].class))
-                    .aliases(clazz.getAnnotation(CommandAlias.class))
-                    .usage(clazz.getAnnotation(CommandUsage.class))
-                    .completions(clazz.getAnnotation(CommandCompletion.class))
-                    .description(clazz.getAnnotation(CommandDescription.class))
-                    .permission(clazz.getAnnotation(CommandPermission.class))
-                    .type(true);
-
-            return (ParentCommand<T>) builder.build();
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+        Method baseMethod = ReflectionUtils.getMethodAnnotatedWith(clazz, NoArgsCommand.class);
+        if (baseMethod == null) {
+            throw new IllegalArgumentException("Class " + clazz.getName() + " has no method with @NoArgsCommand annotation!");
         }
+
+        CommandBuilder builder = CommandBuilder.newBuilder(baseCommand)
+                .executor(baseMethod)
+                .aliases(clazz.getAnnotation(CommandAlias.class))
+                .usage(clazz.getAnnotation(CommandUsage.class))
+                .completions(clazz.getAnnotation(CommandCompletion.class))
+                .description(clazz.getAnnotation(CommandDescription.class))
+                .permission(clazz.getAnnotation(CommandPermission.class))
+                .type(true);
+        return (ParentCommand<T>) builder.build();
     }
 
     @Nullable
@@ -81,7 +81,6 @@ final class CommandConverter<T> {
                 .description(method.getAnnotation(CommandDescription.class))
                 .permission(method.getAnnotation(CommandPermission.class))
                 .type(false);
-
         return (ChildCommand<T>) builder.build();
     }
 }

@@ -57,7 +57,7 @@ public final class ParentCommand<T> extends AbstractCommand<T> {
 
     @NotNull
     public List<String> findAllChildAliases() {
-        final List<String> aliases = new ArrayList<>();
+        List<String> aliases = new ArrayList<>();
 
         for (ChildCommand<T> childCommand : this.child) {
             aliases.addAll(Arrays.asList(childCommand.getAliases()));

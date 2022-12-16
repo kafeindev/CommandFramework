@@ -25,6 +25,7 @@
 package net.mineles.commands.bukkit;
 
 import net.mineles.commands.common.command.context.CommandContextProvider;
+import net.mineles.commands.common.reflect.ReflectionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -44,14 +45,14 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
 
         put(Enum.class, (sender, args, value, parameter) -> {
             Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) parameter.getType();
-            for (Enum<?> e : enumClass.getEnumConstants()) {
-                if (e.name().equalsIgnoreCase(value)) {
-                    return e;
-                }
-            }
+            Enum<?> found = ReflectionUtils.getEnum(enumClass, value);
 
-            sender.sendMessage("§cInvalid value: " + value);
-            return null;
+            if (found != null) {
+                return found.name();
+            }else {
+                sender.sendMessage("§cInvalid value: " + value);
+                return null;
+            }
         });
 
         put(char.class, (sender, args, value, parameter) -> value.length() == 1 ? value.charAt(0) : null);

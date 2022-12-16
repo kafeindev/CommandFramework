@@ -25,6 +25,7 @@
 package net.mineles.commands.common.command.context;
 
 import net.mineles.commands.common.component.SenderComponent;
+import net.mineles.commands.common.predicates.DefaultParameterPredicates;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,7 +58,7 @@ public final class CommandContextResolver<T> {
             if (handledContext == null) {
                 return null;
             } else {
-                if (!(SenderComponent.class.isAssignableFrom(type) || type.equals(String[].class))) {
+                if (!(DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type))) {
                     argIndex++;
                 }
                 result[i] = handledContext;

@@ -24,11 +24,7 @@
 
 package net.mineles.commands.common.command;
 
-import net.mineles.commands.common.component.SenderComponent;
-import org.jetbrains.annotations.NotNull;
-
 public interface BaseCommand {
 
-    void execute(@NotNull SenderComponent sender, @NotNull String[] args);
 
 }

@@ -26,11 +26,13 @@ package net.mineles.commands.common.command;
 
 import net.mineles.commands.common.command.abstraction.ChildCommand;
 import net.mineles.commands.common.command.abstraction.ParentCommand;
+import net.mineles.commands.common.command.annotation.Subcommand;
 import net.mineles.commands.common.command.completion.Completion;
 import net.mineles.commands.common.command.completion.CompletionProvider;
 import net.mineles.commands.common.command.context.CommandContext;
 import net.mineles.commands.common.command.context.CommandContextProvider;
 import net.mineles.commands.common.command.context.CommandContextResolver;
+import net.mineles.commands.common.reflect.ReflectionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -83,9 +85,7 @@ public abstract class CommandManager<T> {
                 command = existingCommand.get();
             }
 
-            for (Method method : baseCommand.getClass().getDeclaredMethods()) {
-                method.setAccessible(true);
-
+            for (Method method : ReflectionUtils.getMethodsAnnotatedWith(baseCommand.getClass(), Subcommand.class, true)) {
                 ChildCommand<T> childCommand = this.converter.convert(baseCommand, method);
                 if (childCommand != null) {
                     command.putChild(childCommand);

@@ -36,10 +36,10 @@ import java.util.List;
 public final class CommandAnnotationProcessor {
 
     private static final List<Class<? extends Annotation>> ANNOTATIONS = ImmutableList.of(
+            NoArgsCommand.class, Subcommand.class,
             CommandAlias.class, CommandDescription.class,
             CommandCompletion.class, CommandUsage.class,
-            CommandPermission.class,
-            Subcommand.class
+            CommandPermission.class
     );
 
     private CommandAnnotationProcessor() {}
