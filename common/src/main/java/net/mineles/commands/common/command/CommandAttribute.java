@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 public final class CommandAttribute {
 
     @NotNull
-    public static CommandAttribute of(@NotNull String[] aliases, @Nullable String description, @Nullable String usage,
+    public static CommandAttribute of(@NotNull String[] aliases, @Nullable String usage, @Nullable String description,
                                       @Nullable String permission, @NotNull String permissionMessage) {
         return new CommandAttribute(aliases, description, usage, permission, permissionMessage);
     }
@@ -50,8 +50,8 @@ public final class CommandAttribute {
     @NotNull
     private final String permissionMessage;
 
-    private CommandAttribute(@NotNull String[] aliases, @Nullable String description, @Nullable String usage,
-                            @Nullable String permission, @NotNull String permissionMessage) {
+    private CommandAttribute(@NotNull String[] aliases, @Nullable String usage, @Nullable String description,
+                             @Nullable String permission, @NotNull String permissionMessage) {
         this.aliases = aliases;
         this.permission = permission;
         this.permissionMessage = permissionMessage;
