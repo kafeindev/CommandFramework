@@ -31,7 +31,7 @@ public final class JDACommandManager extends CommandManager<OptionMapping> {
         for (String alias : command.getAliases()) {
             CommandCreateAction commandCreateAction = this.jda.upsertCommand(alias, command.getDescription());
 
-            if (command.hasChild()) {
+            if (!command.hasChild()) {
                 Method executor = command.getExecutor();
 
                 OptionData[] optionData = JDAOptionProcessor.process(executor);
