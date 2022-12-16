@@ -34,7 +34,11 @@ import java.lang.reflect.Method;
 
 public final class ChildCommand<T> extends AbstractCommand<T> {
 
-    public ChildCommand(@NotNull BaseCommand baseCommand, @NotNull Method executor,
+    public ChildCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
+        super(baseCommand, attribute, completions);
+    }
+
+    public ChildCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
                         @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
         super(baseCommand, executor, attribute, completions);
     }

@@ -24,7 +24,6 @@
 
 package net.mineles.commands.common.command.abstraction;
 
-import com.google.common.collect.ImmutableList;
 import net.mineles.commands.common.command.BaseCommand;
 import net.mineles.commands.common.command.CommandAttribute;
 import net.mineles.commands.common.command.completion.RegisteredCompletion;
@@ -37,16 +36,14 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 public abstract class AbstractCommand<T> {
 
     @NotNull
     private final BaseCommand baseCommand;
 
-    @NotNull
+    @Nullable
     private final Method executor;
 
     @NotNull
@@ -55,7 +52,11 @@ public abstract class AbstractCommand<T> {
     @Nullable
     private final RegisteredCompletion[] completions;
 
-    protected AbstractCommand(@NotNull BaseCommand baseCommand, @NotNull Method executor,
+    protected AbstractCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
+        this(baseCommand, null, attribute, completions);
+    }
+
+    protected AbstractCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
                               @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
         this.baseCommand = baseCommand;
         this.executor = executor;
@@ -66,6 +67,11 @@ public abstract class AbstractCommand<T> {
     public abstract boolean isChild();
 
     public void execute(@NotNull SenderComponent sender, @NotNull CommandContextResolver<T> contextResolver, @NotNull T[] args) {
+        if (executor == null) {
+            sender.sendMessage(getUsage());
+            return;
+        }
+
         if (getPermission() != null && !sender.hasPermission(getPermission())) {
             sender.sendMessage(getPermissionMessage());
             return;
@@ -112,7 +118,7 @@ public abstract class AbstractCommand<T> {
         return this.baseCommand;
     }
 
-    @NotNull
+    @Nullable
     public Method getExecutor() {
         return this.executor;
     }

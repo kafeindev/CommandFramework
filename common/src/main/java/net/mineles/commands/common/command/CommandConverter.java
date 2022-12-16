@@ -45,13 +45,8 @@ final class CommandConverter<T> {
             throw new IllegalArgumentException("Class " + clazz.getName() + " has no annotations!");
         }
 
-        Method baseMethod = ReflectionUtils.getMethodAnnotatedWith(clazz, NoArgsCommand.class);
-        if (baseMethod == null) {
-            throw new IllegalArgumentException("Class " + clazz.getName() + " has no method with @NoArgsCommand annotation!");
-        }
-
         CommandBuilder builder = CommandBuilder.newBuilder(baseCommand)
-                .executor(baseMethod)
+                .executor(ReflectionUtils.getMethodAnnotatedWith(clazz, NoArgsCommand.class))
                 .aliases(clazz.getAnnotation(CommandAlias.class))
                 .usage(clazz.getAnnotation(CommandUsage.class))
                 .completions(clazz.getAnnotation(CommandCompletion.class))

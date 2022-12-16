@@ -40,7 +40,11 @@ public final class ParentCommand<T> extends AbstractCommand<T> {
 
     private final List<ChildCommand<T>> child = new ArrayList<>();
 
-    public ParentCommand(@NotNull BaseCommand baseCommand, @NotNull Method executor,
+    public ParentCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
+        super(baseCommand, attribute, completions);
+    }
+
+    public ParentCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
                          @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
         super(baseCommand, executor, attribute, completions);
     }
@@ -74,5 +78,9 @@ public final class ParentCommand<T> extends AbstractCommand<T> {
 
     public void putChild(ChildCommand<T> childCommand) {
         this.child.add(childCommand);
+    }
+
+    public boolean hasChild() {
+        return !this.child.isEmpty();
     }
 }

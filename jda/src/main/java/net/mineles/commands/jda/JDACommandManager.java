@@ -1,6 +1,7 @@
 package net.mineles.commands.jda;
 
 import net.mineles.commands.common.command.CommandManager;
+import net.mineles.commands.common.command.abstraction.AbstractCommand;
 import net.mineles.commands.common.command.abstraction.ChildCommand;
 import net.mineles.commands.common.command.abstraction.ParentCommand;
 import net.mineles.commands.jda.context.JDACommandContextProvider;
@@ -30,20 +31,27 @@ public final class JDACommandManager extends CommandManager<OptionMapping> {
         for (String alias : command.getAliases()) {
             CommandCreateAction commandCreateAction = this.jda.upsertCommand(alias, command.getDescription());
 
-            for (ChildCommand<OptionMapping> childCommand : command.findAllChild()) {
-                Method method = childCommand.getExecutor();
+            if (command.hasChild()) {
+                Method executor = command.getExecutor();
 
-                SubcommandData[] subcommands = new SubcommandData[childCommand.getAliases().length];
-                for (int i = 0; i < childCommand.getAliases().length; i++) {
-                    SubcommandData subcommandData = new SubcommandData(childCommand.getAliases()[i], childCommand.getDescription());
+                OptionData[] optionData = JDAOptionProcessor.process(executor);
+                commandCreateAction.addOptions(optionData);
+            }else {
+                for (ChildCommand<OptionMapping> childCommand : command.findAllChild()) {
+                    Method method = childCommand.getExecutor();
 
-                    OptionData[] optionData = JDAOptionProcessor.process(method);
-                    subcommandData.addOptions(optionData);
+                    SubcommandData[] subcommands = new SubcommandData[childCommand.getAliases().length];
+                    for (int i = 0; i < childCommand.getAliases().length; i++) {
+                        SubcommandData subcommandData = new SubcommandData(childCommand.getAliases()[i], childCommand.getDescription());
 
-                    subcommands[i] = subcommandData;
+                        OptionData[] optionData = JDAOptionProcessor.process(method);
+                        subcommandData.addOptions(optionData);
+
+                        subcommands[i] = subcommandData;
+                    }
+
+                    commandCreateAction.addSubcommands(subcommands);
                 }
-
-                commandCreateAction.addSubcommands(subcommands);
             }
 
             commandCreateAction.queue();

@@ -47,6 +47,7 @@ public final class CommandBuilder {
     @NotNull
     private final BaseCommand baseCommand;
 
+    @Nullable
     private Method executor;
 
     private String[] aliases;
@@ -77,7 +78,7 @@ public final class CommandBuilder {
         return this;
     }
 
-    public CommandBuilder executor(@NotNull Method executor) {
+    public CommandBuilder executor(@Nullable Method executor) {
         this.executor = executor;
         return this;
     }
