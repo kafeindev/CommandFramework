@@ -39,14 +39,7 @@ public final class JDASenderComponent implements SenderComponent {
     }
 
     public void sendMessage(@NotNull String message, boolean ephemeral) {
-        if (ephemeral) {
-            reply.setEphemeral(true).editOriginal(message).queue();
-        } else {
-            TextChannel channel = this.reply.getInteraction().getTextChannel();
-            Message jdaMessage = channel.sendMessage(message).complete();
-
-            jdaMessage.delete().queueAfter(5, java.util.concurrent.TimeUnit.SECONDS);
-        }
+        reply.setEphemeral(ephemeral).editOriginal(message).queue();
     }
 
     @Override

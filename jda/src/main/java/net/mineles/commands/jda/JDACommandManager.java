@@ -1,10 +1,8 @@
 package net.mineles.commands.jda;
 
 import net.mineles.commands.common.command.CommandManager;
-import net.mineles.commands.common.command.abstraction.AbstractCommand;
 import net.mineles.commands.common.command.abstraction.ChildCommand;
 import net.mineles.commands.common.command.abstraction.ParentCommand;
-import net.mineles.commands.jda.context.JDACommandContextProvider;
 import net.mineles.commands.jda.misc.JDAOptionProcessor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -42,7 +40,8 @@ public final class JDACommandManager extends CommandManager<OptionMapping> {
 
                     SubcommandData[] subcommands = new SubcommandData[childCommand.getAliases().length];
                     for (int i = 0; i < childCommand.getAliases().length; i++) {
-                        SubcommandData subcommandData = new SubcommandData(childCommand.getAliases()[i], childCommand.getDescription());
+                        String childAlias = childCommand.getAliases()[i];
+                        SubcommandData subcommandData = new SubcommandData(childAlias, childCommand.getDescription());
 
                         OptionData[] optionData = JDAOptionProcessor.process(method);
                         subcommandData.addOptions(optionData);

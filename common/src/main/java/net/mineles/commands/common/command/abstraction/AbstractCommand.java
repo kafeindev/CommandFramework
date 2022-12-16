@@ -66,51 +66,22 @@ public abstract class AbstractCommand<T> {
 
     public abstract boolean isChild();
 
-    public void execute(@NotNull SenderComponent sender, @NotNull CommandContextResolver<T> contextResolver, @NotNull T[] args) {
+    public void execute(@NotNull SenderComponent sender, @Nullable Object[] parameters) {
         if (executor == null) {
             sender.sendMessage(getUsage());
             return;
-        }
-
-        if (getPermission() != null && !sender.hasPermission(getPermission())) {
+        } else if (getPermission() != null && !sender.hasPermission(getPermission())) {
             sender.sendMessage(getPermissionMessage());
             return;
         }
 
         try {
-            Object[] resolvedParameters;
-            if (isChild()) {
-                Parameter[] parameters = this.executor.getParameters();
-                if (args.length != getAvailableArgumentSize(parameters)) {
-                    sender.sendMessage(getUsage());
-                    return;
-                }
-
-                resolvedParameters = contextResolver.resolve(sender, parameters, args);
-            } else {
-                resolvedParameters = new Object[]{sender, args};
+            if (parameters != null) {
+                executor.invoke(this.baseCommand, parameters);
             }
-
-            if (resolvedParameters != null) {
-                this.executor.invoke(this.baseCommand, resolvedParameters);
-            }
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException("Failed to execute command", e);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    public int getAvailableArgumentSize(@NotNull Parameter[] parameters) {
-        int availableArgument = 0;
-        for (Parameter parameter : parameters) {
-            Class<?> type = parameter.getType();
-            if (DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type)) {
-                continue;
-            }
-
-            availableArgument++;
-        }
-
-        return availableArgument;
     }
 
     @NotNull

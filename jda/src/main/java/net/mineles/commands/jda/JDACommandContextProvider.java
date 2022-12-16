@@ -1,4 +1,4 @@
-package net.mineles.commands.jda.context;
+package net.mineles.commands.jda;
 
 import net.mineles.commands.common.command.context.CommandContextProvider;
 import net.mineles.commands.jda.component.JDASenderComponent;
@@ -25,7 +25,8 @@ public final class JDACommandContextProvider extends CommandContextProvider<Opti
         put(TextChannel.class, (sender, args, value, parameter) -> value.getAsTextChannel());
         put(NewsChannel.class, (sender, args, value, parameter) -> value.getAsNewsChannel());
         put(ThreadChannel.class, (sender, args, value, parameter) -> value.getAsThreadChannel());
-        put(AudioChannel.class, (sender, args, value, parameter) -> value.getAsVoiceChannel());
+
+        put(AudioChannel.class, (sender, args, value, parameter) -> value.getAsAudioChannel());
         put(VoiceChannel.class, (sender, args, value, parameter) -> value.getAsVoiceChannel());
         put(StageChannel.class, (sender, args, value, parameter) -> value.getAsStageChannel());
 

@@ -24,65 +24,60 @@
 
 package net.mineles.commands.common.command;
 
-import net.mineles.commands.common.command.abstraction.ChildCommand;
+import net.mineles.commands.common.command.abstraction.AbstractCommand;
 import net.mineles.commands.common.command.abstraction.ParentCommand;
-import net.mineles.commands.common.command.completion.Completion;
-import net.mineles.commands.common.command.completion.RegisteredCompletion;
 import net.mineles.commands.common.command.context.CommandContextResolver;
 import net.mineles.commands.common.component.SenderComponent;
+import net.mineles.commands.common.predicates.DefaultParameterPredicates;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
-public interface CommandExecutor {
+public interface CommandExecutor<T> {
 
-    default void execute(@NotNull CommandManager<String> manager,
-                         @NotNull ParentCommand<String> command, @NotNull SenderComponent sender,
-                         @NotNull String label, @NotNull String[] args) {
-        if (!command.containsAlias(label)) return;
-
-        CommandContextResolver<String> contextResolver = manager.getContextResolver();
-        if (args.length == 0 || !command.findChild(args[0]).isPresent()) {
-            command.execute(sender, contextResolver, args);
+    default void execute(@NotNull CommandManager<T> manager, @NotNull ParentCommand<T> command,
+                         @Nullable String subCommand, @NotNull T[] args, @NotNull SenderComponent sender) {
+        if (subCommand == null || !command.findChild(subCommand).isPresent()) {
+            command.execute(sender, resolveContexts(manager.getContextResolver(), command, args, sender));
         } else {
             if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
                 sender.sendMessage(command.getPermissionMessage());
                 return;
             }
 
-            ChildCommand<String> childCommand = command.findChild(args[0]).get();
-            childCommand.execute(sender, contextResolver, resolveArgs(args));
+            command.findChild(subCommand).ifPresent(childCommand -> {
+                childCommand.execute(sender, resolveContexts(manager.getContextResolver(), childCommand, args, sender));
+            });
         }
     }
 
     @Nullable
-    default List<String> tabComplete(@NotNull CommandManager<String> manager, @NotNull ParentCommand<String> command,
-                                     @NotNull SenderComponent sender, @NotNull String[] args) {
-        if (args.length == 1) return command.findAllChildAliases();
-        if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
+    default Object[] resolveContexts(@NotNull CommandContextResolver<T> resolver, @NotNull AbstractCommand<T> command,
+                                     @NotNull T[] args, @NotNull SenderComponent sender) {
+        Method executor = command.getExecutor();
+
+        Parameter[] parameters = executor.getParameters();
+        if (args.length != getAvailableArgumentSize(parameters)) {
+            sender.sendMessage(command.getUsage());
             return null;
         }
 
-        try {
-            ChildCommand<String> childCommand = command.findChild(args[0]).orElse(null);
-            if (childCommand.getPermission() != null && !sender.hasPermission(childCommand.getPermission())) {
-                return null;
-            }
-
-            RegisteredCompletion registeredCompletion = childCommand.findCompletion(args).orElse(null);
-            Completion completion = manager.findCompletion(registeredCompletion.getName()).orElse(null);
-            return completion.getCompletions(sender);
-        }catch (NullPointerException e) {
-            return null;
-        }
+        return resolver.resolve(sender, parameters, args);
     }
 
-    default String[] resolveArgs(@NotNull String[] args) {
-        if (args.length == 0) return args;
+    default int getAvailableArgumentSize(@NotNull Parameter[] parameters) {
+        int availableArgument = 0;
+        for (Parameter parameter : parameters) {
+            Class<?> type = parameter.getType();
+            if (DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type)) {
+                continue;
+            }
 
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-        return newArgs;
+            availableArgument++;
+        }
+
+        return availableArgument;
     }
 }

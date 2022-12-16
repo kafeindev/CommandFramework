@@ -27,7 +27,10 @@ package net.mineles.commands.bukkit;
 import net.mineles.commands.bukkit.component.BukkitSenderComponent;
 import net.mineles.commands.common.command.CommandExecutor;
 import net.mineles.commands.common.command.CommandManager;
+import net.mineles.commands.common.command.abstraction.ChildCommand;
 import net.mineles.commands.common.command.abstraction.ParentCommand;
+import net.mineles.commands.common.command.completion.Completion;
+import net.mineles.commands.common.command.completion.RegisteredCompletion;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
-public final class BukkitCommandExecutor extends BukkitCommand implements CommandExecutor {
+public final class BukkitCommandExecutor extends BukkitCommand implements CommandExecutor<String> {
 
     @NotNull
     private final CommandManager<String> manager;
@@ -50,14 +53,40 @@ public final class BukkitCommandExecutor extends BukkitCommand implements Comman
     }
 
     @Override
-    public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
-        execute(this.manager, this.command, new BukkitSenderComponent(sender), commandLabel, args);
+    public boolean execute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+        if (!command.containsAlias(label)) return true;
+
+        execute(manager, command, args[0], resolveArgs(args), new BukkitSenderComponent(sender));
         return true;
     }
 
     @NotNull
     @Override
     public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-        return tabComplete(this.manager, this.command, new BukkitSenderComponent(sender), args);
+        if (args.length == 1) return command.findAllChildAliases();
+        if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
+            return null;
+        }
+
+        try {
+            ChildCommand<String> childCommand = command.findChild(args[0]).orElse(null);
+            if (childCommand.getPermission() != null && !sender.hasPermission(childCommand.getPermission())) {
+                return null;
+            }
+
+            RegisteredCompletion registeredCompletion = childCommand.findCompletion(args).orElse(null);
+            Completion completion = manager.findCompletion(registeredCompletion.getName()).orElse(null);
+            return completion.getCompletions(new BukkitSenderComponent(sender));
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
+
+    private String[] resolveArgs(@NotNull String[] args) {
+        if (args.length == 0) return args;
+
+        String[] newArgs = new String[args.length - 1];
+        System.arraycopy(args, 1, newArgs, 0, args.length - 1);
+        return newArgs;
     }
 }

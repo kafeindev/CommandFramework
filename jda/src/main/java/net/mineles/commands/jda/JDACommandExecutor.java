@@ -1,9 +1,8 @@
 package net.mineles.commands.jda;
 
+import net.mineles.commands.common.command.CommandExecutor;
 import net.mineles.commands.common.command.CommandManager;
-import net.mineles.commands.common.command.abstraction.ChildCommand;
 import net.mineles.commands.common.command.abstraction.ParentCommand;
-import net.mineles.commands.common.component.SenderComponent;
 import net.mineles.commands.jda.component.JDASenderComponent;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -12,7 +11,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
-public final class JDACommandExecutor extends ListenerAdapter {
+public final class JDACommandExecutor extends ListenerAdapter implements CommandExecutor<OptionMapping> {
 
     @NotNull
     private final CommandManager<OptionMapping> manager;
@@ -37,20 +36,8 @@ public final class JDACommandExecutor extends ListenerAdapter {
 
         InteractionHook reply = event.deferReply().setEphemeral(true).complete();
 
-        SenderComponent sender = new JDASenderComponent(member, reply);
         OptionMapping[] args = event.getOptions().toArray(new OptionMapping[0]);
-
-        if (event.getSubcommandName() == null || !command.findChild(event.getSubcommandName()).isPresent()) {
-            command.execute(sender, manager.getContextResolver(), args);
-        } else {
-            if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
-                sender.sendMessage(command.getPermissionMessage());
-                return;
-            }
-
-            ChildCommand<OptionMapping> childCommand = command.findChild(event.getSubcommandName()).get();
-            childCommand.execute(sender, manager.getContextResolver(), args);
-        }
+        execute(manager, command, event.getSubcommandName(), args, new JDASenderComponent(member, reply));
     }
 
     /*@Override
