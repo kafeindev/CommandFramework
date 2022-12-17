@@ -32,7 +32,7 @@ public final class CommandAttribute {
     @NotNull
     public static CommandAttribute of(@NotNull String[] aliases, @Nullable String usage, @Nullable String description,
                                       @Nullable String permission, @NotNull String permissionMessage) {
-        return new CommandAttribute(aliases, description, usage, permission, permissionMessage);
+        return new CommandAttribute(aliases, usage, description, permission, permissionMessage);
     }
 
     @NotNull
