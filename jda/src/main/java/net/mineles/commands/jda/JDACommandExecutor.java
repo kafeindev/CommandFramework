@@ -17,9 +17,9 @@ public final class JDACommandExecutor extends ListenerAdapter implements Command
     private final CommandManager<OptionMapping> manager;
 
     @NotNull
-    private final ParentCommand<OptionMapping> command;
+    private final ParentCommand command;
 
-    public JDACommandExecutor(@NotNull CommandManager<OptionMapping> manager, @NotNull ParentCommand<OptionMapping> command) {
+    public JDACommandExecutor(@NotNull CommandManager<OptionMapping> manager, @NotNull ParentCommand command) {
         this.manager = manager;
         this.command = command;
     }

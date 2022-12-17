@@ -36,11 +36,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public final class ParentCommand<T> extends AbstractCommand<T> {
+public final class ParentCommand extends AbstractCommand {
 
-    private final List<ChildCommand<T>> child = new ArrayList<>();
+    private final List<ChildCommand> child = new ArrayList<>();
 
-    public ParentCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
+    public ParentCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute,
+                         @Nullable RegisteredCompletion[] completions) {
         super(baseCommand, attribute, completions);
     }
 
@@ -55,7 +56,7 @@ public final class ParentCommand<T> extends AbstractCommand<T> {
     }
 
     @NotNull
-    public List<ChildCommand<T>> findAllChild() {
+    public List<ChildCommand> findAllChild() {
         return this.child;
     }
 
@@ -63,20 +64,20 @@ public final class ParentCommand<T> extends AbstractCommand<T> {
     public List<String> findAllChildAliases() {
         List<String> aliases = new ArrayList<>();
 
-        for (ChildCommand<T> childCommand : this.child) {
+        for (ChildCommand childCommand : this.child) {
             aliases.addAll(Arrays.asList(childCommand.getAliases()));
         }
 
         return aliases;
     }
 
-    public Optional<ChildCommand<T>> findChild(String alias) {
+    public Optional<ChildCommand> findChild(String alias) {
         return this.child.stream()
                 .filter(c -> c.containsAlias(alias))
                 .findFirst();
     }
 
-    public void putChild(ChildCommand<T> childCommand) {
+    public void putChild(ChildCommand childCommand) {
         this.child.add(childCommand);
     }
 

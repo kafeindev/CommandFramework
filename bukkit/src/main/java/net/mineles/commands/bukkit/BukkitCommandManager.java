@@ -52,7 +52,7 @@ public final class BukkitCommandManager extends CommandManager<String> {
     }
 
     @Override
-    public void initializeRegisteredCommand(@NotNull ParentCommand<String> command) {
+    public void initializeRegisteredCommand(@NotNull ParentCommand command) {
         BukkitCommandExecutor executor = new BukkitCommandExecutor(this, command);
 
         String fallBackPrefix = this.plugin.getName().toLowerCase(Locale.ROOT);

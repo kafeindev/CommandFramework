@@ -42,9 +42,9 @@ import java.util.Optional;
 
 public abstract class CommandManager<T> {
 
-    private final List<ParentCommand<T>> commands = new ArrayList<>();
+    private final List<ParentCommand> commands = new ArrayList<>();
 
-    private final CommandConverter<T> converter = new CommandConverter<>();
+    private final CommandConverter converter = new CommandConverter();
 
     @NotNull
     private final CompletionProvider completionProvider;
@@ -60,13 +60,13 @@ public abstract class CommandManager<T> {
         this.contextResolver = new CommandContextResolver<>(contextProvider);
     }
 
-    public Optional<ParentCommand<T>> findCommand(@NotNull String alias) {
+    public Optional<ParentCommand> findCommand(@NotNull String alias) {
         return this.commands.stream()
                 .filter(command -> command.containsAlias(alias))
                 .findFirst();
     }
 
-    public Optional<ParentCommand<T>> findCommandByChildAliases(@NotNull String alias) {
+    public Optional<ParentCommand> findCommandByChildAliases(@NotNull String alias) {
         return this.commands.stream()
                 .filter(command -> command.findChild(alias).isPresent())
                 .findFirst();
@@ -78,15 +78,15 @@ public abstract class CommandManager<T> {
 
     public void registerCommand(@NotNull BaseCommand... baseCommands) {
         for (BaseCommand baseCommand : baseCommands) {
-            ParentCommand<T> command = this.converter.convert(baseCommand);
+            ParentCommand command = this.converter.convert(baseCommand);
 
-            Optional<ParentCommand<T>> existingCommand = findCommand(command.getAliases()[0]);
+            Optional<ParentCommand> existingCommand = findCommand(command.getAliases()[0]);
             if (existingCommand.isPresent()) {
                 command = existingCommand.get();
             }
 
             for (Method method : ReflectionUtils.getMethodsAnnotatedWith(baseCommand.getClass(), Subcommand.class, true)) {
-                ChildCommand<T> childCommand = this.converter.convert(baseCommand, method);
+                ChildCommand childCommand = this.converter.convert(baseCommand, method);
                 if (childCommand != null) {
                     command.putChild(childCommand);
                 }
@@ -96,7 +96,7 @@ public abstract class CommandManager<T> {
         }
     }
 
-    public void registerCommand(@NotNull ParentCommand<T> command) {
+    public void registerCommand(@NotNull ParentCommand command) {
         initializeRegisteredCommand(command);
 
         this.commands.add(command);
@@ -110,7 +110,7 @@ public abstract class CommandManager<T> {
         getContextProvider().put(clazz, context);
     }
 
-    public abstract void initializeRegisteredCommand(@NotNull ParentCommand<T> command);
+    public abstract void initializeRegisteredCommand(@NotNull ParentCommand command);
 
     @NotNull
     public CommandContextProvider<T> getContextProvider() {

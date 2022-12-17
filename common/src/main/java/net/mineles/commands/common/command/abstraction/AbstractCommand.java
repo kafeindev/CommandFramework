@@ -27,18 +27,15 @@ package net.mineles.commands.common.command.abstraction;
 import net.mineles.commands.common.command.BaseCommand;
 import net.mineles.commands.common.command.CommandAttribute;
 import net.mineles.commands.common.command.completion.RegisteredCompletion;
-import net.mineles.commands.common.command.context.CommandContextResolver;
 import net.mineles.commands.common.component.SenderComponent;
-import net.mineles.commands.common.predicates.DefaultParameterPredicates;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Optional;
 
-public abstract class AbstractCommand<T> {
+public abstract class AbstractCommand {
 
     @NotNull
     private final BaseCommand baseCommand;

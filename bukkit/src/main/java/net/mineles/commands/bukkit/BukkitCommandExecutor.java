@@ -44,9 +44,9 @@ public final class BukkitCommandExecutor extends BukkitCommand implements Comman
     private final CommandManager<String> manager;
 
     @NotNull
-    private final ParentCommand<String> command;
+    private final ParentCommand command;
 
-    public BukkitCommandExecutor(@NotNull CommandManager<String> manager, @NotNull ParentCommand<String> command) {
+    public BukkitCommandExecutor(@NotNull CommandManager<String> manager, @NotNull ParentCommand command) {
         super(command.getAliases()[0], command.getDescription(), command.getUsage(), Arrays.asList(command.getAliases()));
         this.command = command;
         this.manager = manager;
@@ -69,7 +69,7 @@ public final class BukkitCommandExecutor extends BukkitCommand implements Comman
         }
 
         try {
-            ChildCommand<String> childCommand = command.findChild(args[0]).orElse(null);
+            ChildCommand childCommand = command.findChild(args[0]).orElse(null);
             if (childCommand.getPermission() != null && !sender.hasPermission(childCommand.getPermission())) {
                 return null;
             }

@@ -25,7 +25,7 @@ public final class JDACommandManager extends CommandManager<OptionMapping> {
     }
 
     @Override
-    public void initializeRegisteredCommand(@NotNull ParentCommand<OptionMapping> command) {
+    public void initializeRegisteredCommand(@NotNull ParentCommand command) {
         for (String alias : command.getAliases()) {
             CommandCreateAction commandCreateAction = this.jda.upsertCommand(alias, command.getDescription());
 
@@ -35,7 +35,7 @@ public final class JDACommandManager extends CommandManager<OptionMapping> {
                 OptionData[] optionData = JDAOptionProcessor.process(executor);
                 commandCreateAction.addOptions(optionData);
             }else {
-                for (ChildCommand<OptionMapping> childCommand : command.findAllChild()) {
+                for (ChildCommand childCommand : command.findAllChild()) {
                     Method method = childCommand.getExecutor();
 
                     SubcommandData[] subcommands = new SubcommandData[childCommand.getAliases().length];

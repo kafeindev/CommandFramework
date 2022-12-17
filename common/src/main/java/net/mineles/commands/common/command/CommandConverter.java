@@ -34,10 +34,10 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-final class CommandConverter<T> {
+final class CommandConverter {
 
     @NotNull
-    ParentCommand<T> convert(@NotNull BaseCommand baseCommand) {
+    ParentCommand convert(@NotNull BaseCommand baseCommand) {
         Class<?> clazz = baseCommand.getClass();
 
         Annotation[] annotations = clazz.getAnnotations();
@@ -53,11 +53,11 @@ final class CommandConverter<T> {
                 .description(clazz.getAnnotation(CommandDescription.class))
                 .permission(clazz.getAnnotation(CommandPermission.class))
                 .type(true);
-        return (ParentCommand<T>) builder.build();
+        return (ParentCommand) builder.build();
     }
 
     @Nullable
-    ChildCommand<T> convert(@NotNull BaseCommand baseCommand, @NotNull Method method) {
+    ChildCommand convert(@NotNull BaseCommand baseCommand, @NotNull Method method) {
         Annotation[] annotations = method.getAnnotations();
         if (annotations.length == 0) {
             return null;
@@ -76,6 +76,6 @@ final class CommandConverter<T> {
                 .description(method.getAnnotation(CommandDescription.class))
                 .permission(method.getAnnotation(CommandPermission.class))
                 .type(false);
-        return (ChildCommand<T>) builder.build();
+        return (ChildCommand) builder.build();
     }
 }

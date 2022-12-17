@@ -37,7 +37,7 @@ import java.lang.reflect.Parameter;
 
 public interface CommandExecutor<T> {
 
-    default void execute(@NotNull CommandManager<T> manager, @NotNull ParentCommand<T> command,
+    default void execute(@NotNull CommandManager<T> manager, @NotNull ParentCommand command,
                          @Nullable String subCommand, @NotNull T[] args, @NotNull SenderComponent sender) {
         if (subCommand == null || !command.findChild(subCommand).isPresent()) {
             command.execute(sender, resolveContexts(manager.getContextResolver(), command, args, sender));
@@ -54,7 +54,7 @@ public interface CommandExecutor<T> {
     }
 
     @Nullable
-    default Object[] resolveContexts(@NotNull CommandContextResolver<T> resolver, @NotNull AbstractCommand<T> command,
+    default Object[] resolveContexts(@NotNull CommandContextResolver<T> resolver, @NotNull AbstractCommand command,
                                      @NotNull T[] args, @NotNull SenderComponent sender) {
         Method executor = command.getExecutor();
 
