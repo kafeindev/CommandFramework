@@ -42,6 +42,10 @@ public final class JDASenderComponent implements SenderComponent {
         reply.setEphemeral(ephemeral).editOriginal(message).queue();
     }
 
+    public void sendMessage(@NotNull Message message, boolean ephemeral) {
+        reply.setEphemeral(ephemeral).editOriginal(message).queue();
+    }
+
     @Override
     public boolean hasPermission(@NotNull String permission) {
         Permission jdaPermission = Permission.valueOf(permission.toUpperCase(Locale.ROOT));
