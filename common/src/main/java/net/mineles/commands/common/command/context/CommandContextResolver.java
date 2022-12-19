@@ -52,16 +52,16 @@ public final class CommandContextResolver<T> {
             CommandContext<T> context = this.provider.find(type)
                     .orElseThrow(() -> new IllegalArgumentException("Cannot find context for type " + type.getName()));
 
-            Object handledContext = args.length > 0
-                    ? context.handle(sender, args, args[argIndex], parameter)
-                    : null;
-            if (handledContext == null) {
-                return null;
-            } else {
+            T arg = args.length == 0 ? null : args[argIndex];
+            try {
+                Object handledContext = context.handle(sender, args, arg, parameter);
+
                 if (!(DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type))) {
                     argIndex++;
                 }
                 result[i] = handledContext;
+            }catch (NullPointerException e) {
+                return null;
             }
         }
 

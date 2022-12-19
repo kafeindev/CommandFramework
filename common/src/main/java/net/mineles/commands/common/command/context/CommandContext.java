@@ -34,6 +34,6 @@ public interface CommandContext<T> {
 
     @Nullable
     Object handle(@NotNull SenderComponent sender, @NotNull T[] args,
-                  @NotNull T value, @NotNull Parameter parameter);
+                  @Nullable T value, @NotNull Parameter parameter);
 
 }
