@@ -70,6 +70,10 @@ public final class JDASenderComponent implements SenderComponent {
         reply.setEphemeral(ephemeral).editOriginal(message).queue();
     }
 
+    public TextChannel getChannel() {
+        return reply.getInteraction().getTextChannel();
+    }
+
     @Override
     public boolean hasPermission(@NotNull String permission) {
         Permission jdaPermission = Permission.valueOf(permission.toUpperCase(Locale.ROOT));
