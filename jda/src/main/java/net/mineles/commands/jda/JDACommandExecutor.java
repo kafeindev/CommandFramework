@@ -58,7 +58,12 @@ public final class JDACommandExecutor extends ListenerAdapter implements Command
         String commandName = event.getName();
         if (!command.containsAlias(commandName)) return;
 
-        InteractionHook reply = event.deferReply().setEphemeral(true).complete();
+        InteractionHook reply;
+        if (command.reply()) {
+            reply = event.deferReply().setEphemeral(true).complete();
+        }else {
+            reply = null;
+        }
 
         OptionMapping[] args = event.getOptions().toArray(new OptionMapping[0]);
         execute(manager, command, event.getSubcommandName(), args, new JDASenderComponent(member, event, reply));

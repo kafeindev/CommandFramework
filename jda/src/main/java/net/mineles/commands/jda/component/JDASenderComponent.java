@@ -46,10 +46,10 @@ public final class JDASenderComponent implements SenderComponent {
     @NotNull
     private final SlashCommandInteractionEvent event;
 
-    @NotNull
+    @Nullable
     private final InteractionHook reply;
 
-    public JDASenderComponent(@NotNull Member member, @NotNull SlashCommandInteractionEvent event, @NotNull InteractionHook reply) {
+    public JDASenderComponent(@NotNull Member member, @NotNull SlashCommandInteractionEvent event, @Nullable InteractionHook reply) {
         this.member = member;
         this.event = event;
         this.reply = reply;
@@ -71,19 +71,39 @@ public final class JDASenderComponent implements SenderComponent {
     }
 
     public void sendMessage(@NotNull String message, boolean ephemeral) {
-        reply.setEphemeral(ephemeral).editOriginal(message).queue();
+        if (reply == null) {
+            event.reply(message).setEphemeral(ephemeral).queue();
+        } else {
+            reply.setEphemeral(ephemeral).editOriginal(message).queue();
+        }
     }
 
     public void sendMessage(@NotNull Message message, boolean ephemeral) {
-        reply.setEphemeral(ephemeral).editOriginal(message).queue();
+        if (reply == null) {
+            event.reply(message).setEphemeral(ephemeral).queue();
+        } else {
+            reply.setEphemeral(ephemeral).editOriginal(message).queue();
+        }
     }
 
-    public TextChannel getChannel() {
-        return reply.getInteraction().getTextChannel();
-    }
-
+    @NotNull
     public SlashCommandInteractionEvent getEvent() {
         return event;
+    }
+
+    @Nullable
+    public InteractionHook getReply() {
+        return this.reply;
+    }
+
+    @NotNull
+    public Member getMember() {
+        return this.member;
+    }
+
+    @NotNull
+    public TextChannel getChannel() {
+        return event.getTextChannel();
     }
 
     @Override
@@ -106,15 +126,5 @@ public final class JDASenderComponent implements SenderComponent {
     @Override
     public boolean isPlayer() {
         return true;
-    }
-
-    @NotNull
-    public InteractionHook getReply() {
-        return this.reply;
-    }
-
-    @NotNull
-    public Member getMember() {
-        return this.member;
     }
 }
