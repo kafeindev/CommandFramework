@@ -49,16 +49,21 @@ public abstract class AbstractCommand {
     @Nullable
     private final RegisteredCompletion[] completions;
 
-    protected AbstractCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
-        this(baseCommand, null, attribute, completions);
+    private final boolean reply;
+
+    protected AbstractCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute,
+                              @Nullable RegisteredCompletion[] completions, boolean reply) {
+        this(baseCommand, null, attribute, completions, reply);
     }
 
     protected AbstractCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
-                              @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
+                              @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions,
+                              boolean reply) {
         this.baseCommand = baseCommand;
         this.executor = executor;
         this.attribute = attribute;
         this.completions = completions;
+        this.reply = reply;
     }
 
     public abstract boolean isChild();
@@ -132,6 +137,10 @@ public abstract class AbstractCommand {
         }
 
         return Optional.empty();
+    }
+
+    public boolean reply() {
+        return this.reply;
     }
 
     @Nullable

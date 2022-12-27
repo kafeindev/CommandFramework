@@ -52,6 +52,7 @@ final class CommandConverter {
                 .completions(clazz.getAnnotation(CommandCompletion.class))
                 .description(clazz.getAnnotation(CommandDescription.class))
                 .permission(clazz.getAnnotation(CommandPermission.class))
+                .reply(clazz.getAnnotation(CommandReply.class))
                 .type(true);
         return (ParentCommand) builder.build();
     }
@@ -75,6 +76,7 @@ final class CommandConverter {
                 .completions(method.getAnnotation(CommandCompletion.class))
                 .description(method.getAnnotation(CommandDescription.class))
                 .permission(method.getAnnotation(CommandPermission.class))
+                .reply(method.getAnnotation(CommandReply.class))
                 .type(false);
         return (ChildCommand) builder.build();
     }

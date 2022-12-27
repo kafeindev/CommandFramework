@@ -41,13 +41,14 @@ public final class ParentCommand extends AbstractCommand {
     private final List<ChildCommand> child = new ArrayList<>();
 
     public ParentCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute,
-                         @Nullable RegisteredCompletion[] completions) {
-        super(baseCommand, attribute, completions);
+                         @Nullable RegisteredCompletion[] completions, boolean reply) {
+        super(baseCommand, attribute, completions, reply);
     }
 
     public ParentCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
-                         @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions) {
-        super(baseCommand, executor, attribute, completions);
+                         @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions,
+                         boolean reply) {
+        super(baseCommand, executor, attribute, completions, reply);
     }
 
     @Override

@@ -22,32 +22,17 @@
  * SOFTWARE.
  */
 
-package net.mineles.commands.common.command.abstraction;
+package net.mineles.commands.common.command.annotation;
 
-import net.mineles.commands.common.command.BaseCommand;
-import net.mineles.commands.common.command.CommandAttribute;
-import net.mineles.commands.common.command.completion.RegisteredCompletion;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.lang.reflect.Method;
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface CommandReply {
 
-public final class ChildCommand extends AbstractCommand {
-
-    public ChildCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute,
-                        @Nullable RegisteredCompletion[] completions, boolean reply) {
-        super(baseCommand, attribute, completions, reply);
-    }
-
-    public ChildCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
-                        @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions,
-                        boolean reply) {
-        super(baseCommand, executor, attribute, completions, reply);
-    }
-
-    @Override
-    public boolean isChild() {
-        return true;
-    }
+    boolean value();
 
 }

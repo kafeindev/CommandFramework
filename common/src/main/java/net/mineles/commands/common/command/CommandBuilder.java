@@ -67,6 +67,8 @@ public final class CommandBuilder {
     @UnknownNullability
     private String permissionMessage;
 
+    private boolean reply = true;
+
     private boolean isParent;
 
     private CommandBuilder(@NotNull BaseCommand baseCommand) {
@@ -125,6 +127,13 @@ public final class CommandBuilder {
         return this;
     }
 
+    public CommandBuilder reply(@Nullable Annotation annotation) {
+        if (annotation == null) return this;
+
+        this.reply = CommandAnnotationProcessor.process(annotation, "value", false);
+        return this;
+    }
+
     private CommandAttribute buildAttribute() {
         return CommandAttribute.of(
                 this.aliases,
@@ -139,7 +148,7 @@ public final class CommandBuilder {
         CommandAttribute attribute = buildAttribute();
 
         return this.isParent
-                ? new ParentCommand(this.baseCommand, this.executor, attribute, this.completions)
-                : new ChildCommand(this.baseCommand, this.executor, attribute, this.completions);
+                ? new ParentCommand(this.baseCommand, this.executor, attribute, this.completions, this.reply)
+                : new ChildCommand(this.baseCommand, this.executor, attribute, this.completions, this.reply);
     }
 }

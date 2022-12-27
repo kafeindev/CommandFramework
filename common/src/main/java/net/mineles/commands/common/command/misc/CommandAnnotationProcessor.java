@@ -39,7 +39,7 @@ public final class CommandAnnotationProcessor {
             NoArgsCommand.class, Subcommand.class,
             CommandAlias.class, CommandDescription.class,
             CommandCompletion.class, CommandUsage.class,
-            CommandPermission.class
+            CommandPermission.class, CommandReply.class
     );
 
     private CommandAnnotationProcessor() {}
