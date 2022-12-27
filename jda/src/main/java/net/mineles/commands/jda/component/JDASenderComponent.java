@@ -24,6 +24,7 @@
 
 package net.mineles.commands.jda.component;
 
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.mineles.commands.common.component.SenderComponent;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
@@ -39,11 +40,18 @@ import java.util.UUID;
 
 public final class JDASenderComponent implements SenderComponent {
 
+    @NotNull
     private final Member member;
+
+    @NotNull
+    private final SlashCommandInteractionEvent event;
+
+    @NotNull
     private final InteractionHook reply;
 
-    public JDASenderComponent(@NotNull Member member, @NotNull InteractionHook reply) {
+    public JDASenderComponent(@NotNull Member member, @NotNull SlashCommandInteractionEvent event, @NotNull InteractionHook reply) {
         this.member = member;
+        this.event = event;
         this.reply = reply;
     }
 
@@ -72,6 +80,10 @@ public final class JDASenderComponent implements SenderComponent {
 
     public TextChannel getChannel() {
         return reply.getInteraction().getTextChannel();
+    }
+
+    public SlashCommandInteractionEvent getEvent() {
+        return event;
     }
 
     @Override
