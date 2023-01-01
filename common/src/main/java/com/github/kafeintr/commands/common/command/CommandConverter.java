@@ -27,7 +27,6 @@ package com.github.kafeintr.commands.common.command;
 import com.github.kafeintr.commands.common.command.annotation.*;
 import com.github.kafeintr.commands.common.command.abstraction.ChildCommand;
 import com.github.kafeintr.commands.common.command.abstraction.ParentCommand;
-import net.mineles.commands.common.command.annotation.*;
 import com.github.kafeintr.commands.common.reflect.ReflectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

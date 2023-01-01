@@ -26,7 +26,6 @@ package com.github.kafeintr.commands.common.command.misc;
 
 import com.github.kafeintr.commands.common.command.annotation.*;
 import com.google.common.collect.ImmutableList;
-import net.mineles.commands.common.command.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
