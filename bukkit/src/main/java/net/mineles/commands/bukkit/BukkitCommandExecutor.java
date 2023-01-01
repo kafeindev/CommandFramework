@@ -56,7 +56,7 @@ public final class BukkitCommandExecutor extends BukkitCommand implements Comman
     public boolean execute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         if (!command.containsAlias(label)) return true;
 
-        execute(manager, command, args[0], resolveArgs(args), new BukkitSenderComponent(sender));
+        execute(manager, command, args[0], resolveArgs(args), new BukkitSenderComponent(sender), true);
         return true;
     }
 

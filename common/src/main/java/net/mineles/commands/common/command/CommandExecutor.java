@@ -38,9 +38,10 @@ import java.lang.reflect.Parameter;
 public interface CommandExecutor<T> {
 
     default void execute(@NotNull CommandManager<T> manager, @NotNull ParentCommand command,
-                         @Nullable String subCommand, @NotNull T[] args, @NotNull SenderComponent sender) {
+                         @Nullable String subCommand, @NotNull T[] args, @NotNull SenderComponent sender,
+                         boolean contextIsRequired) {
         if (subCommand == null || !command.findChild(subCommand).isPresent()) {
-            command.execute(sender, resolveContexts(manager.getContextResolver(), command, args, sender));
+            command.execute(sender, resolveContexts(manager.getContextResolver(), command, args, sender, contextIsRequired));
         } else {
             if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
                 sender.sendMessage(command.getPermissionMessage());
@@ -48,18 +49,18 @@ public interface CommandExecutor<T> {
             }
 
             command.findChild(subCommand).ifPresent(childCommand -> {
-                childCommand.execute(sender, resolveContexts(manager.getContextResolver(), childCommand, args, sender));
+                childCommand.execute(sender, resolveContexts(manager.getContextResolver(), childCommand, args, sender, contextIsRequired));
             });
         }
     }
 
     @Nullable
     default Object[] resolveContexts(@NotNull CommandContextResolver<T> resolver, @NotNull AbstractCommand command,
-                                     @NotNull T[] args, @NotNull SenderComponent sender) {
+                                     @NotNull T[] args, @NotNull SenderComponent sender, boolean contextIsRequired) {
         Method executor = command.getExecutor();
 
         Parameter[] parameters = executor.getParameters();
-        if (args.length != getAvailableArgumentSize(parameters)) {
+        if (contextIsRequired && args.length != getAvailableArgumentSize(parameters)) {
             sender.sendMessage(command.getUsage());
             return null;
         }
