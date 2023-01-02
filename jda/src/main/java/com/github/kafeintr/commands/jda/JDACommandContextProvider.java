@@ -68,5 +68,4 @@ public final class JDACommandContextProvider extends CommandContextProvider<Opti
         put(double.class, (sender, args, value, parameter) -> value.getAsDouble());
         put(Double.class, (sender, args, value, parameter) -> value.getAsDouble());
     }
-
 }
