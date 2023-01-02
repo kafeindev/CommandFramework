@@ -41,7 +41,7 @@ public final class CommandContextResolver<T> {
     }
 
     @Nullable
-    public Object[] resolve(@NotNull SenderComponent sender, @NotNull Parameter[] parameters, @NotNull T[] args) {
+    public Object[] resolve(@NotNull SenderComponent sender, @NotNull Parameter[] parameters, @NotNull T[] args, boolean argsRequired) {
         Object[] result = new Object[parameters.length];
 
         int argIndex = 0;
@@ -52,16 +52,21 @@ public final class CommandContextResolver<T> {
             CommandContext<T> context = this.provider.find(type)
                     .orElseThrow(() -> new IllegalArgumentException("Cannot find context for type " + type.getName()));
 
-            T arg = args.length - 1 < i ? null : args[argIndex];
+            if (argsRequired && argIndex >= args.length) {
+                return null;
+            }
+
+            T arg = args.length > argIndex ? args[argIndex] : null;
             try {
                 Object handledContext = context.handle(sender, args, arg, parameter);
 
-                if (!(DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type))) {
-                    argIndex++;
-                }
                 result[i] = handledContext;
             }catch (NullPointerException e) {
                 return null;
+            }
+
+            if (!(DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type))) {
+                argIndex++;
             }
         }
 
