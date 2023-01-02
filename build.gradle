@@ -37,6 +37,9 @@ subprojects {
     publishing {
         publications {
             maven(MavenPublication) {
+                groupId = 'com.github.kafeintr'
+                artifactId = 'commands'
+
                 from components.java
             }
         }
