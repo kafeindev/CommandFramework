@@ -10,7 +10,7 @@ subprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
 
     group 'com.github.kafeintr.commands'
-    version '1.1.7'
+    version '1.1.8'
 
     sourceCompatibility = 8
     targetCompatibility = 8
@@ -36,7 +36,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'com.github.kafeintr'
             artifactId 'commands'
-            version '1.1.7'
+            version '1.1.8'
 
             from components.java
         }
