@@ -1,15 +1,14 @@
 plugins {
-    id 'java'
-    id 'maven-publish'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
     apply plugin: 'com.github.johnrengelman.shadow'
 
-    group 'com.github.kafeintr.commands'
+    group 'me.kafein.commands'
     version '1.1.8'
 
     sourceCompatibility = 8
@@ -29,16 +28,12 @@ subprojects {
         compileOnly 'com.google.guava:guava:31.1-jre'
         compileOnly 'org.jetbrains:annotations:23.0.0'
     }
-}
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId 'com.github.kafeintr'
-            artifactId 'commands'
-            version '1.1.8'
-
-            from components.java
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+            }
         }
     }
 }

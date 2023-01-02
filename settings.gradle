@@ -1,5 +1,5 @@
 rootProject.name = 'CommandFramework'
 include 'common'
-include 'bukkit'
 include 'jda'
+include 'bukkit'
 
