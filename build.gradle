@@ -30,9 +30,16 @@ subprojects {
         compileOnly 'org.jetbrains:annotations:23.0.0'
     }
 
+    shadowJar {
+        archiveClassifier = null
+    }
+
     publishing {
         publications {
             maven(MavenPublication) {
+                groupId = project.group
+                version = project.version
+
                 from components.java
             }
         }
