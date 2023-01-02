@@ -33,7 +33,7 @@ import java.lang.reflect.Parameter;
 public interface CommandContext<T> {
 
     @Nullable
-    Object handle(@NotNull SenderComponent sender, @NotNull T[] args,
+    Object handle(@NotNull SenderComponent sender, @Nullable T[] args,
                   @Nullable T value, @NotNull Parameter parameter);
 
 }

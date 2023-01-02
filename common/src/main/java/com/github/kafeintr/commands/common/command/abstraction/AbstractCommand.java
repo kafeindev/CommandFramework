@@ -78,7 +78,9 @@ public abstract class AbstractCommand {
         }
 
         try {
-            executor.invoke(this.baseCommand, parameters);
+            if (parameters != null) {
+                executor.invoke(this.baseCommand, parameters);
+            }
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

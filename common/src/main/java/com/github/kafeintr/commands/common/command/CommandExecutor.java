@@ -38,10 +38,10 @@ import java.lang.reflect.Parameter;
 public interface CommandExecutor<T> {
 
     default void execute(@NotNull CommandManager<T> manager, @NotNull ParentCommand command,
-                         @Nullable String subCommand, @NotNull T[] args, @NotNull SenderComponent sender,
-                         boolean contextIsRequired) {
+                         @Nullable String subCommand, @Nullable T[] args, @NotNull SenderComponent sender,
+                         boolean argsIsRequired) {
         if (subCommand == null || !command.findChild(subCommand).isPresent()) {
-            command.execute(sender, resolveContexts(manager.getContextResolver(), command, args, sender, contextIsRequired));
+            command.execute(sender, resolveContexts(manager.getContextResolver(), command, args, sender, argsIsRequired));
         } else {
             if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
                 sender.sendMessage(command.getPermissionMessage());
@@ -49,23 +49,23 @@ public interface CommandExecutor<T> {
             }
 
             command.findChild(subCommand).ifPresent(childCommand -> {
-                childCommand.execute(sender, resolveContexts(manager.getContextResolver(), childCommand, args, sender, contextIsRequired));
+                childCommand.execute(sender, resolveContexts(manager.getContextResolver(), childCommand, args, sender, argsIsRequired));
             });
         }
     }
 
     @Nullable
     default Object[] resolveContexts(@NotNull CommandContextResolver<T> resolver, @NotNull AbstractCommand command,
-                                     @NotNull T[] args, @NotNull SenderComponent sender, boolean contextIsRequired) {
+                                     @Nullable T[] args, @NotNull SenderComponent sender, boolean argsIsRequired) {
         Method executor = command.getExecutor();
 
         Parameter[] parameters = executor.getParameters();
-        if (contextIsRequired && args.length != getAvailableArgumentSize(parameters)) {
+        if (argsIsRequired && (args == null || args.length != getAvailableArgumentSize(parameters))) {
             sender.sendMessage(command.getUsage());
             return null;
         }
 
-        return resolver.resolve(sender, parameters, args, contextIsRequired);
+        return resolver.resolve(sender, parameters, args, argsIsRequired);
     }
 
     default int getAvailableArgumentSize(@NotNull Parameter[] parameters) {
