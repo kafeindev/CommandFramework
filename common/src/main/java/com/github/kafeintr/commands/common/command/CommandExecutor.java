@@ -65,7 +65,7 @@ public interface CommandExecutor<T> {
             return null;
         }
 
-        return resolver.resolve(sender, parameters, args);
+        return resolver.resolve(sender, parameters, args, contextIsRequired);
     }
 
     default int getAvailableArgumentSize(@NotNull Parameter[] parameters) {
