@@ -2,8 +2,6 @@
 
 [Wiki](https://github.com/KafeinTR/CommandFramework/wiki) - Wiki for using.
 
-***
-
 **Use with Maven**
 ```xml
 <repository>
