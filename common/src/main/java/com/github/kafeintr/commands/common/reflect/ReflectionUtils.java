@@ -90,6 +90,16 @@ public final class ReflectionUtils {
     }
 
     @Nullable
+    public static Annotation getAnnotation(@Nullable Class<?> clazz, @NotNull Class<? extends Annotation> annotationClass) {
+        return clazz == null ? null : clazz.getAnnotation(annotationClass);
+    }
+
+    @Nullable
+    public static Annotation getAnnotation(@Nullable Method method, @NotNull Class<? extends Annotation> annotationClass) {
+        return method == null ? null : method.getAnnotation(annotationClass);
+    }
+
+    @Nullable
     public static Enum<?> getEnum(@NotNull Class<? extends Enum<?>> enumClass, @NotNull String name) {
         for (Enum<?> e : enumClass.getEnumConstants()) {
             if (e.name().equalsIgnoreCase(name)) {

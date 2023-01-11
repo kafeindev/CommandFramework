@@ -74,7 +74,7 @@ public final class BukkitCommandExecutor extends BukkitCommand implements Comman
                 return null;
             }
 
-            RegisteredCompletion registeredCompletion = childCommand.findCompletion(args).orElse(null);
+            RegisteredCompletion registeredCompletion = childCommand.findCompletion(args.length).orElse(null);
             Completion completion = manager.findCompletion(registeredCompletion.getName()).orElse(null);
             return completion.getCompletions(new BukkitSenderComponent(sender));
         } catch (NullPointerException e) {

@@ -55,19 +55,25 @@ public final class JDACommandManager extends CommandManager<OptionMapping> {
 
             if (!command.hasChild()) {
                 Method executor = command.getExecutor();
+                if (executor == null) {
+                    return;
+                }
 
-                OptionData[] optionData = JDAOptionProcessor.process(executor);
+                OptionData[] optionData = JDAOptionProcessor.process(this, command, executor);
                 commandCreateAction.addOptions(optionData);
             } else {
                 for (ChildCommand childCommand : command.findAllChild()) {
                     Method method = childCommand.getExecutor();
+                    if (method == null) {
+                        continue;
+                    }
 
                     SubcommandData[] subcommands = new SubcommandData[childCommand.getAliases().length];
                     for (int i = 0; i < childCommand.getAliases().length; i++) {
                         String childAlias = childCommand.getAliases()[i];
                         SubcommandData subcommandData = new SubcommandData(childAlias, childCommand.getDescription());
 
-                        OptionData[] optionData = JDAOptionProcessor.process(method);
+                        OptionData[] optionData = JDAOptionProcessor.process(this, childCommand, method);
                         subcommandData.addOptions(optionData);
 
                         subcommands[i] = subcommandData;

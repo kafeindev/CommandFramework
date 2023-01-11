@@ -26,6 +26,7 @@ package com.github.kafeintr.commands.common.command.completion;
 
 import com.github.kafeintr.commands.common.component.SenderComponent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ public abstract class Completion {
         this.name = name;
     }
 
-    public abstract List<String> getCompletions(@NotNull SenderComponent sender);
+    public abstract List<String> getCompletions(@Nullable SenderComponent sender);
 
     @NotNull
     public String getName() {

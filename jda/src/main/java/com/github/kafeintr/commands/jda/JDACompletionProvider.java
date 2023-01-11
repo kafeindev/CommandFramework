@@ -24,11 +24,22 @@
 
 package com.github.kafeintr.commands.jda;
 
+import com.github.kafeintr.commands.common.command.completion.Completion;
 import com.github.kafeintr.commands.common.command.completion.CompletionProvider;
+import com.github.kafeintr.commands.common.component.SenderComponent;
+import com.google.common.collect.ImmutableList;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public final class JDACompletionProvider extends CompletionProvider {
-
     @Override
-    public void initialize() {} //because jda already has completion system
-
+    public void initialize() {
+        register(new Completion("@languages") {
+            @Override
+            public List<String> getCompletions(@Nullable SenderComponent sender) {
+                return ImmutableList.of("en", "de", "es", "fr", "it", "nl", "pl", "pt", "ru", "tr", "zh");
+            }
+        });
+    }
 }

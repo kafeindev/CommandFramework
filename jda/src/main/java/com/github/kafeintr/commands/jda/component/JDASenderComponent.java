@@ -24,13 +24,13 @@
 
 package com.github.kafeintr.commands.jda.component;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import com.github.kafeintr.commands.common.component.SenderComponent;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,13 +43,14 @@ public final class JDASenderComponent implements SenderComponent {
     @NotNull
     private final Member member;
 
-    @NotNull
+    @Nullable
     private final SlashCommandInteractionEvent event;
 
     @Nullable
     private final InteractionHook reply;
 
-    public JDASenderComponent(@NotNull Member member, @NotNull SlashCommandInteractionEvent event, @Nullable InteractionHook reply) {
+    public JDASenderComponent(@NotNull Member member, @Nullable SlashCommandInteractionEvent event,
+                              @Nullable InteractionHook reply) {
         this.member = member;
         this.event = event;
         this.reply = reply;
@@ -86,7 +87,7 @@ public final class JDASenderComponent implements SenderComponent {
         }
     }
 
-    @NotNull
+    @Nullable
     public SlashCommandInteractionEvent getEvent() {
         return event;
     }

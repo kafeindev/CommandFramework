@@ -45,14 +45,15 @@ final class CommandConverter {
             throw new IllegalArgumentException("Class " + clazz.getName() + " has no annotations!");
         }
 
+        Method noArgsMethod = ReflectionUtils.getMethodAnnotatedWith(clazz, NoArgsCommand.class);
         CommandBuilder builder = CommandBuilder.newBuilder(baseCommand)
-                .executor(ReflectionUtils.getMethodAnnotatedWith(clazz, NoArgsCommand.class))
-                .aliases(clazz.getAnnotation(CommandAlias.class))
-                .usage(clazz.getAnnotation(CommandUsage.class))
-                .completions(clazz.getAnnotation(CommandCompletion.class))
-                .description(clazz.getAnnotation(CommandDescription.class))
-                .permission(clazz.getAnnotation(CommandPermission.class))
-                .reply(clazz.getAnnotation(CommandReply.class))
+                .executor(noArgsMethod)
+                .aliases(clazz.getAnnotation(CommandAlias.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandAlias.class))
+                .usage(clazz.getAnnotation(CommandUsage.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandUsage.class))
+                .completions(clazz.getAnnotation(CommandCompletion.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandCompletion.class))
+                .description(clazz.getAnnotation(CommandDescription.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandDescription.class))
+                .permission(clazz.getAnnotation(CommandPermission.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandPermission.class))
+                .reply(clazz.getAnnotation(CommandReply.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandReply.class))
                 .type(true);
         return (ParentCommand) builder.build();
     }

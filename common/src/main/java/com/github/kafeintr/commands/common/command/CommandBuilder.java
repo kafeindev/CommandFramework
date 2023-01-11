@@ -85,52 +85,70 @@ public final class CommandBuilder {
         return this;
     }
 
-    public CommandBuilder aliases(@Nullable Annotation annotation) {
-        if (annotation == null) return this;
+    public CommandBuilder aliases(@Nullable Annotation... annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation == null) continue;
 
-        final String value = CommandAnnotationProcessor.process(annotation);
-        if (value == null) return this;
+            final String value = CommandAnnotationProcessor.process(annotation);
+            if (value == null) continue;
 
-        this.aliases = CommandPatternProcessor.processAlias(value);
+            this.aliases = CommandPatternProcessor.processAlias(value);
+        }
+
         return this;
     }
 
-    public CommandBuilder usage(@Nullable Annotation annotation) {
-        if (annotation == null) return this;
+    public CommandBuilder usage(@Nullable Annotation... annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation == null) continue;
 
-        this.usage = CommandAnnotationProcessor.process(annotation);
+            this.usage = CommandAnnotationProcessor.process(annotation);
+        }
+
         return this;
     }
 
-    public CommandBuilder completions(@Nullable Annotation annotation) {
-        if (annotation == null) return this;
+    public CommandBuilder completions(@Nullable Annotation... annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation == null) continue;
 
-        final String value = CommandAnnotationProcessor.process(annotation);
-        if (value == null) return this;
+            final String value = CommandAnnotationProcessor.process(annotation);
+            if (value == null) continue;
 
-        this.completions = CommandPatternProcessor.processCompletion(value);
+            this.completions = CommandPatternProcessor.processCompletion(value);
+        }
+
         return this;
     }
 
-    public CommandBuilder description(@Nullable Annotation annotation) {
-        if (annotation == null) return this;
+    public CommandBuilder description(@Nullable Annotation... annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation == null) continue;
 
-        this.description = CommandAnnotationProcessor.process(annotation);
+            this.description = CommandAnnotationProcessor.process(annotation);
+        }
+
         return this;
     }
 
-    public CommandBuilder permission(@Nullable Annotation annotation) {
-        if (annotation == null) return this;
+    public CommandBuilder permission(@Nullable Annotation... annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation == null) continue;
 
-        this.permission = CommandAnnotationProcessor.process(annotation);
-        this.permissionMessage = CommandAnnotationProcessor.process(annotation, "message", true);
+            this.permission = CommandAnnotationProcessor.process(annotation);
+            this.permissionMessage = CommandAnnotationProcessor.process(annotation, "message", true);
+        }
+
         return this;
     }
 
-    public CommandBuilder reply(@Nullable Annotation annotation) {
-        if (annotation == null) return this;
+    public CommandBuilder reply(@Nullable Annotation... annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation == null) continue;
 
-        this.reply = CommandAnnotationProcessor.process(annotation, "value", false);
+            this.reply = CommandAnnotationProcessor.process(annotation, "value", false);
+        }
+
         return this;
     }
 

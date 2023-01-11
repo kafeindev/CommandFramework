@@ -125,13 +125,13 @@ public abstract class AbstractCommand {
         return this.completions;
     }
 
-    public Optional<RegisteredCompletion> findCompletion(String[] args) {
+    public Optional<RegisteredCompletion> findCompletion(int index) {
         if (this.completions == null) {
             return Optional.empty();
         }
 
         for (RegisteredCompletion completion : completions) {
-            if (completion.getIndex() == args.length - 1) {
+            if (completion.getIndex() == index) {
                 return Optional.of(completion);
             }
         }
