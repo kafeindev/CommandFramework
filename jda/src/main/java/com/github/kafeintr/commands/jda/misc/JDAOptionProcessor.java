@@ -24,19 +24,21 @@
 
 package com.github.kafeintr.commands.jda.misc;
 
-import com.github.kafeintr.commands.common.command.abstraction.AbstractCommand;
+import com.github.kafeintr.commands.common.command.Command;
 import com.github.kafeintr.commands.jda.JDACommandManager;
-import com.google.common.collect.ImmutableList;
 import com.github.kafeintr.commands.jda.annotation.JDACommandCompletion;
 import com.github.kafeintr.commands.jda.annotation.JDACommandCompletions;
-import net.dv8tion.jda.api.interactions.commands.Command;
+import com.google.common.collect.ImmutableList;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class JDAOptionProcessor {
@@ -47,9 +49,13 @@ public final class JDAOptionProcessor {
     private JDAOptionProcessor() {
     }
 
-    @NotNull
-    public static OptionData[] process(@NotNull JDACommandManager commandManager, @NotNull AbstractCommand command,
-                                       @NotNull Method method) {
+    @Nullable
+    public static OptionData[] process(@NotNull JDACommandManager commandManager, @NotNull Command command) {
+        Method method = command.getExecutor();
+        if (method == null) {
+            return null;
+        }
+
         List<JDACommandCompletion> completions = new ArrayList<>();
 
         ANNOTATIONS.forEach(annotationClass -> {
@@ -83,8 +89,8 @@ public final class JDAOptionProcessor {
 
             command.findCompletion(i + 1).flatMap(registeredCompletion ->
                     commandManager.findCompletion(registeredCompletion.getName())).ifPresent(c -> {
-                List<Command.Choice> choices = c.getCompletions(null).stream()
-                        .map(s -> new Command.Choice(s, s))
+                List<net.dv8tion.jda.api.interactions.commands.Command.Choice> choices = c.complete(null).stream()
+                        .map(s -> new net.dv8tion.jda.api.interactions.commands.Command.Choice(s, s))
                         .collect(Collectors.toList());
 
                 option.addChoices(choices);
@@ -92,7 +98,6 @@ public final class JDAOptionProcessor {
 
             optionData[i] = option;
         }
-
         return optionData;
     }
 }

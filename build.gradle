@@ -9,7 +9,7 @@ subprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
 
     group 'com.github.kafeintr.commands'
-    version '1.2.5'
+    version '1.2.6'
 
     sourceCompatibility = 8
     targetCompatibility = 8
@@ -22,7 +22,6 @@ subprojects {
         mavenCentral()
 
         maven { url = 'https://jitpack.io' }
-        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     }
 
     dependencies {

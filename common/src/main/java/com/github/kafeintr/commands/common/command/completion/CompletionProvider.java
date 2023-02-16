@@ -24,20 +24,14 @@
 
 package com.github.kafeintr.commands.common.command.completion;
 
-import com.github.kafeintr.commands.common.component.SenderComponent;
 import com.github.kafeintr.commands.common.manager.AbstractManager;
-import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public abstract class CompletionProvider extends AbstractManager<String, Completion> {
-
     protected CompletionProvider() {
         /*register(new Completion("@levels") {
             @Override
-            public List<String> getCompletions(@Nullable SenderComponent sender) {
+            public List<String> complete(@Nullable SenderComponent sender) {
                 return ImmutableList.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
             }
         });*/

@@ -24,6 +24,8 @@
 
 package com.github.kafeintr.commands.common.command.annotation;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,9 +34,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface CommandPermission {
+    @NotNull String value();
 
-    String value();
-
-    String message() default "You don't have permission to use this command!";
-
+    @NotNull String message() default "You don't have permission to use this command!";
 }

@@ -39,21 +39,15 @@ import java.util.Locale;
 import java.util.UUID;
 
 public final class JDASenderComponent implements SenderComponent {
-
     @NotNull
     private final Member member;
 
-    @Nullable
+    @NotNull
     private final SlashCommandInteractionEvent event;
 
-    @Nullable
-    private final InteractionHook reply;
-
-    public JDASenderComponent(@NotNull Member member, @Nullable SlashCommandInteractionEvent event,
-                              @Nullable InteractionHook reply) {
+    public JDASenderComponent(@NotNull Member member, @NotNull SlashCommandInteractionEvent event) {
         this.member = member;
         this.event = event;
-        this.reply = reply;
     }
 
     @Override
@@ -72,29 +66,21 @@ public final class JDASenderComponent implements SenderComponent {
     }
 
     public void sendMessage(@NotNull String message, boolean ephemeral) {
-        if (reply == null) {
-            event.reply(message).setEphemeral(ephemeral).queue();
-        } else {
-            reply.setEphemeral(ephemeral).editOriginal(message).queue();
-        }
+        getReply().setEphemeral(ephemeral).editOriginal(message).queue();
     }
 
     public void sendMessage(@NotNull Message message, boolean ephemeral) {
-        if (reply == null) {
-            event.reply(message).setEphemeral(ephemeral).queue();
-        } else {
-            reply.setEphemeral(ephemeral).editOriginal(message).queue();
-        }
+        getReply().setEphemeral(ephemeral).editOriginal(message).queue();
     }
 
-    @Nullable
+    @NotNull
     public SlashCommandInteractionEvent getEvent() {
         return event;
     }
 
-    @Nullable
+    @NotNull
     public InteractionHook getReply() {
-        return this.reply;
+        return event.getHook();
     }
 
     @NotNull
@@ -110,7 +96,6 @@ public final class JDASenderComponent implements SenderComponent {
     @Override
     public boolean hasPermission(@NotNull String permission) {
         Permission jdaPermission = Permission.valueOf(permission.toUpperCase(Locale.ROOT));
-
         return this.member.hasPermission(jdaPermission);
     }
 

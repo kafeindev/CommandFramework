@@ -24,20 +24,24 @@
 
 package com.github.kafeintr.commands.bukkit;
 
+import com.github.kafeintr.commands.bukkit.paper.PaperAsyncCompletionListener;
+import com.github.kafeintr.commands.common.command.Command;
 import com.github.kafeintr.commands.common.command.CommandManager;
-import com.github.kafeintr.commands.common.command.abstraction.ParentCommand;
+import com.github.kafeintr.commands.common.command.context.resolver.DefaultContextResolver;
+import com.github.kafeintr.commands.common.command.convert.DefaultCommandConverter;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
 public final class BukkitCommandManager extends CommandManager<String> {
-
     @NotNull
     private final Plugin plugin;
 
@@ -45,30 +49,44 @@ public final class BukkitCommandManager extends CommandManager<String> {
     private final CommandMap commandMap;
 
     public BukkitCommandManager(@NotNull Plugin plugin) {
-        super(new BukkitCompletionProvider(), new BukkitCommandContextProvider());
-
+        super(new DefaultCommandConverter(), new BukkitCompletionProvider(),
+                new DefaultContextResolver<>(new BukkitContextProvider()));
         this.plugin = plugin;
         this.commandMap = createCommandMap();
+
+        try {
+            Class.forName("com.destroystokyo.paper.event.server.AsyncTabCompleteEvent");
+
+            PluginManager pluginManager = plugin.getServer().getPluginManager();
+            pluginManager.registerEvents(new PaperAsyncCompletionListener(this), plugin);
+        } catch (ClassNotFoundException ignored) {
+        }
     }
 
     @Override
-    public void initializeRegisteredCommand(@NotNull ParentCommand command) {
+    public void initializeRegisteredCommand(@NotNull Command command) {
         BukkitCommandExecutor executor = new BukkitCommandExecutor(this, command);
 
         String fallBackPrefix = this.plugin.getName().toLowerCase(Locale.ROOT);
         this.commandMap.register(fallBackPrefix, executor);
     }
 
+    @NotNull
     private CommandMap createCommandMap() {
-        try {
-            Server server = Bukkit.getServer();
+        Server server = Bukkit.getServer();
 
+        try {
             Method commandMapMethod = server.getClass().getDeclaredMethod("getCommandMap");
             commandMapMethod.setAccessible(true);
 
             return (CommandMap) commandMapMethod.invoke(server);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to get command map from bukkit server.", e);
         }
+    }
+
+    @Nullable
+    public org.bukkit.command.Command getBukkitCommand(@NotNull String name) {
+        return this.commandMap.getCommand(name);
     }
 }

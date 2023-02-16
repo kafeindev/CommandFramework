@@ -25,15 +25,18 @@
 package com.github.kafeintr.commands.jda;
 
 import com.github.kafeintr.commands.jda.component.JDASenderComponent;
-import com.github.kafeintr.commands.common.command.context.CommandContextProvider;
+import com.github.kafeintr.commands.common.command.context.provider.ContextProvider;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
-public final class JDACommandContextProvider extends CommandContextProvider<OptionMapping> {
-
+public final class JDAContextProvider extends ContextProvider<OptionMapping> {
     @Override
     public void initialize() {
+        super.initialize();
+
         put(JDASenderComponent.class, (sender, args, value, parameter) -> sender);
+        put(SlashCommandInteractionEvent.class, (sender, args, value, parameter) -> ((JDASenderComponent) sender).getEvent());
         put(OptionMapping.class, (sender, args, value, parameter) -> value);
 
         put(User.class, (sender, args, value, parameter) -> value.getAsUser());

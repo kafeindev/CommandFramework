@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Kafein's CommandFramework
+ * Copyright (c) 2023 Kafein's CommandFramework
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,21 @@
  * SOFTWARE.
  */
 
-package com.github.kafeintr.commands.common.command;
+package com.github.kafeintr.commands.common.command.abstraction;
 
-public interface BaseCommand {
+import com.github.kafeintr.commands.common.command.CommandAttribute;
+import com.github.kafeintr.commands.common.command.base.BaseCommand;
+import com.github.kafeintr.commands.common.command.completion.RegisteredCompletion;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
+import java.util.List;
 
+public final class DefaultCommand extends AbstractCommand {
+    public DefaultCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
+                          @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions,
+                          @Nullable List<String> parentCommands) {
+        super(baseCommand, executor, attribute, completions, parentCommands);
+    }
 }

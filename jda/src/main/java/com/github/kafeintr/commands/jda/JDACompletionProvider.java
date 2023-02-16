@@ -37,7 +37,7 @@ public final class JDACompletionProvider extends CompletionProvider {
     public void initialize() {
         register(new Completion("@languages") {
             @Override
-            public List<String> getCompletions(@Nullable SenderComponent sender) {
+            public List<String> complete(@Nullable SenderComponent sender) {
                 return ImmutableList.of("en", "de", "es", "fr", "it", "nl", "pl", "pt", "ru", "tr", "zh");
             }
         });

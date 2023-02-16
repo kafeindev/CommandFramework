@@ -28,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class CommandAttribute {
-
     @NotNull
     public static CommandAttribute of(@NotNull String[] aliases, @Nullable String usage, @Nullable String description,
                                       @Nullable String permission, @NotNull String permissionMessage) {
@@ -41,14 +40,14 @@ public final class CommandAttribute {
     @NotNull
     private final String description;
 
-    @NotNull
-    private final String usage;
-
     @Nullable
     private final String permission;
 
     @NotNull
     private final String permissionMessage;
+
+    private String usage;
+    private boolean usingDefaultUsage;
 
     private CommandAttribute(@NotNull String[] aliases, @Nullable String usage, @Nullable String description,
                              @Nullable String permission, @NotNull String permissionMessage) {
@@ -56,6 +55,7 @@ public final class CommandAttribute {
         this.permission = permission;
         this.permissionMessage = permissionMessage;
 
+        this.usingDefaultUsage = usage == null;
         this.usage = usage == null ? "/" + aliases[0] : usage;
         this.description = description == null ? "No description provided" : description;
     }
@@ -73,6 +73,15 @@ public final class CommandAttribute {
     @NotNull
     public String getUsage() {
         return this.usage;
+    }
+
+    public boolean isUsingDefaultUsage() {
+        return this.usingDefaultUsage;
+    }
+
+    public void setUsage(@NotNull String usage) {
+        this.usage = usage;
+        this.usingDefaultUsage = false;
     }
 
     @Nullable

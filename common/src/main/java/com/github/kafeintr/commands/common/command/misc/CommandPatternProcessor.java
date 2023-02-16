@@ -25,11 +25,20 @@
 package com.github.kafeintr.commands.common.command.misc;
 
 import com.github.kafeintr.commands.common.command.completion.RegisteredCompletion;
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
-public final class CommandPatternProcessor {
+import java.util.LinkedList;
+import java.util.List;
 
+public final class CommandPatternProcessor {
     private CommandPatternProcessor() {}
+
+    @NotNull
+    public static List<String> processParents(@NotNull String value) {
+        String[] split = CommandPatternProvider.PIPE.split(value);
+        return new LinkedList<>(ImmutableList.copyOf(split));
+    }
 
     @NotNull
     public static String[] processAlias(@NotNull String value) {

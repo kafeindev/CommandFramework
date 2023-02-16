@@ -25,28 +25,29 @@
 package com.github.kafeintr.commands.bukkit;
 
 import com.github.kafeintr.commands.bukkit.component.BukkitSenderComponent;
+import com.github.kafeintr.commands.common.command.Command;
 import com.github.kafeintr.commands.common.command.CommandExecutor;
 import com.github.kafeintr.commands.common.command.CommandManager;
-import com.github.kafeintr.commands.common.command.abstraction.ChildCommand;
-import com.github.kafeintr.commands.common.command.abstraction.ParentCommand;
-import com.github.kafeintr.commands.common.command.completion.Completion;
 import com.github.kafeintr.commands.common.command.completion.RegisteredCompletion;
+import com.github.kafeintr.commands.common.component.SenderComponent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public final class BukkitCommandExecutor extends BukkitCommand implements CommandExecutor<String> {
-
     @NotNull
     private final CommandManager<String> manager;
 
     @NotNull
-    private final ParentCommand command;
+    private final Command command;
 
-    public BukkitCommandExecutor(@NotNull CommandManager<String> manager, @NotNull ParentCommand command) {
+    public BukkitCommandExecutor(@NotNull CommandManager<String> manager, @NotNull Command command) {
         super(command.getAliases()[0], command.getDescription(), command.getUsage(), Arrays.asList(command.getAliases()));
         this.command = command;
         this.manager = manager;
@@ -56,37 +57,55 @@ public final class BukkitCommandExecutor extends BukkitCommand implements Comman
     public boolean execute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         if (!command.containsAlias(label)) return true;
 
-        execute(manager, command, args[0], resolveArgs(args), new BukkitSenderComponent(sender), true);
+        BukkitSenderComponent senderComponent = BukkitSenderComponent.from(sender);
+        if (args.length == 0) {
+            Object[] resolvedContexts = resolveContexts(manager, command, senderComponent, args, true);
+            command.execute(senderComponent, resolvedContexts);
+        } else {
+            if (command.getPermission() != null && !senderComponent.hasPermission(command.getPermission())) {
+                sender.sendMessage(command.getPermissionMessage());
+                return false;
+            }
+
+            Command subCommand = command.forceFindSubCommand(args);
+            String[] subArgs = Arrays.copyOfRange(args, subCommand.getParentCommands().size(), args.length);
+            Object[] resolvedContexts = resolveContexts(manager, subCommand, senderComponent, subArgs, true);
+            subCommand.execute(senderComponent, resolvedContexts);
+        }
         return true;
     }
 
-    @NotNull
     @Override
-    public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-        if (args.length == 1) return command.findAllChildAliases();
+    public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args)
+            throws IllegalArgumentException {
+        SenderComponent senderComponent = BukkitSenderComponent.from(sender);
+        if (command.getPermission() != null && !senderComponent.hasPermission(command.getPermission())) {
+            return null;
+        }
+
+        return args.length == 1
+                ? getCompletions(manager, command, senderComponent, args)
+                : getCompletions(manager, command.forceFindSubCommand(args), senderComponent, args);
+    }
+
+    @Nullable
+    private List<String> getCompletions(@NotNull CommandManager<String> manager, @NotNull Command command,
+                                        @NotNull SenderComponent sender, @NotNull String[] args) {
         if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
             return null;
         }
 
-        try {
-            ChildCommand childCommand = command.findChild(args[0]).orElse(null);
-            if (childCommand.getPermission() != null && !sender.hasPermission(childCommand.getPermission())) {
-                return null;
-            }
+        String lastArg = args[args.length - 1];
+        List<String> completions = new ArrayList<>(command.matchSubCommandsAliases(lastArg));
 
-            RegisteredCompletion registeredCompletion = childCommand.findCompletion(args.length).orElse(null);
-            Completion completion = manager.findCompletion(registeredCompletion.getName()).orElse(null);
-            return completion.getCompletions(new BukkitSenderComponent(sender));
-        } catch (NullPointerException e) {
-            return null;
+        int completionIndex = args.length - command.getParentCommands().size();
+        Optional<RegisteredCompletion> registeredCompletion = command.findCompletion(completionIndex);
+        if (!registeredCompletion.isPresent()) {
+            return completions;
         }
-    }
 
-    private String[] resolveArgs(@NotNull String[] args) {
-        if (args.length == 0) return args;
-
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-        return newArgs;
+        manager.findCompletion(registeredCompletion.get().getName())
+                .ifPresent(completion -> completions.addAll(completion.complete(sender, lastArg)));
+        return completions;
     }
 }

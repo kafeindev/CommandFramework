@@ -24,15 +24,18 @@
 
 package com.github.kafeintr.commands.bukkit;
 
-import com.github.kafeintr.commands.common.command.context.CommandContextProvider;
+import com.github.kafeintr.commands.bukkit.component.BukkitSenderComponent;
+import com.github.kafeintr.commands.common.command.context.provider.ContextProvider;
 import com.github.kafeintr.commands.common.reflect.ReflectionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public final class BukkitCommandContextProvider extends CommandContextProvider<String> {
-
+public final class BukkitContextProvider extends ContextProvider<String> {
     @Override
     public void initialize() {
+        super.initialize();
+
+        registerDefaultParameter(BukkitSenderComponent.class, (sender, args, value, parameter) -> sender);
         put(Player.class, (sender, args, value, parameter) -> {
             Player target = Bukkit.getServer().getPlayer(value);
             if (target == null) {
@@ -42,7 +45,6 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
 
             return target;
         });
-
         put(Enum.class, (sender, args, value, parameter) -> {
             Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) parameter.getType();
             Enum<?> found = ReflectionUtils.getEnum(enumClass, value);
@@ -54,12 +56,9 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
                 return null;
             }
         });
-
         put(char.class, (sender, args, value, parameter) -> value.length() == 1 ? value.charAt(0) : null);
-
         put(boolean.class, (sender, args, value, parameter) -> Boolean.parseBoolean(value));
         put(Boolean.class, (sender, args, value, parameter) -> Boolean.parseBoolean(value));
-
         put(byte.class, (sender, args, value, parameter) -> {
             try {
                 return Byte.parseByte(value);
@@ -76,7 +75,6 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
                 return null;
             }
         });
-
         put(short.class, (sender, args, value, parameter) -> {
             try {
                 return Short.parseShort(value);
@@ -93,7 +91,6 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
                 return null;
             }
         });
-
         put(int.class, (sender, args, value, parameter) -> {
             try {
                 return Integer.parseInt(value);
@@ -110,7 +107,6 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
                 return null;
             }
         });
-
         put(long.class, (sender, args, value, parameter) -> {
             try {
                 return Long.parseLong(value);
@@ -127,7 +123,6 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
                 return null;
             }
         });
-
         put(float.class, (sender, args, value, parameter) -> {
             try {
                 return Float.parseFloat(value);
@@ -144,7 +139,6 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
                 return null;
             }
         });
-
         put(double.class, (sender, args, value, parameter) -> {
             try {
                 return Double.parseDouble(value);
@@ -162,5 +156,4 @@ public final class BukkitCommandContextProvider extends CommandContextProvider<S
             }
         });
     }
-
 }

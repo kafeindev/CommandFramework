@@ -22,27 +22,8 @@
  * SOFTWARE.
  */
 
-package com.github.kafeintr.commands.common.command.completion;
+package com.github.kafeintr.commands.common.command.base;
 
-import org.jetbrains.annotations.NotNull;
-
-public final class RegisteredCompletion {
-    private final int index;
-
-    @NotNull
-    private final String name;
-
-    public RegisteredCompletion(int index, @NotNull String name) {
-        this.index = index;
-        this.name = name;
-    }
-
-    public int getIndex() {
-        return this.index;
-    }
-
-    @NotNull
-    public String getName() {
-        return this.name;
-    }
+// This is a marker interface for commands.
+public interface BaseCommand {
 }

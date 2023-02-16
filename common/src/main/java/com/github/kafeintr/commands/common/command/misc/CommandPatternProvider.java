@@ -27,9 +27,7 @@ package com.github.kafeintr.commands.common.command.misc;
 import java.util.regex.Pattern;
 
 public final class CommandPatternProvider {
-
     public static final Pattern PIPE = Pattern.compile("\\|");
 
     private CommandPatternProvider() {}
-
 }

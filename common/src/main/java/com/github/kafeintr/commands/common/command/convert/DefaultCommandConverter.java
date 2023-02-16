@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Kafein's CommandFramework
+ * Copyright (c) 2023 Kafein's CommandFramework
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,13 @@
  * SOFTWARE.
  */
 
-package com.github.kafeintr.commands.common.command;
+package com.github.kafeintr.commands.common.command.convert;
 
+import com.github.kafeintr.commands.common.command.Command;
+import com.github.kafeintr.commands.common.command.CommandBuilder;
+import com.github.kafeintr.commands.common.command.abstraction.DefaultCommand;
 import com.github.kafeintr.commands.common.command.annotation.*;
-import com.github.kafeintr.commands.common.command.abstraction.ChildCommand;
-import com.github.kafeintr.commands.common.command.abstraction.ParentCommand;
+import com.github.kafeintr.commands.common.command.base.BaseCommand;
 import com.github.kafeintr.commands.common.reflect.ReflectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,10 +36,9 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-final class CommandConverter {
-
-    @NotNull
-    ParentCommand convert(@NotNull BaseCommand baseCommand) {
+public final class DefaultCommandConverter implements CommandConverter {
+    @Override
+    public @NotNull Command convert(@NotNull BaseCommand baseCommand) {
         Class<?> clazz = baseCommand.getClass();
 
         Annotation[] annotations = clazz.getAnnotations();
@@ -46,20 +47,19 @@ final class CommandConverter {
         }
 
         Method noArgsMethod = ReflectionUtils.getMethodAnnotatedWith(clazz, NoArgsCommand.class);
-        CommandBuilder builder = CommandBuilder.newBuilder(baseCommand)
+        return CommandBuilder.newBuilder(baseCommand)
                 .executor(noArgsMethod)
+                .parents(clazz.getAnnotation(CommandParent.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandParent.class))
                 .aliases(clazz.getAnnotation(CommandAlias.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandAlias.class))
                 .usage(clazz.getAnnotation(CommandUsage.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandUsage.class))
                 .completions(clazz.getAnnotation(CommandCompletion.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandCompletion.class))
                 .description(clazz.getAnnotation(CommandDescription.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandDescription.class))
                 .permission(clazz.getAnnotation(CommandPermission.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandPermission.class))
-                .reply(clazz.getAnnotation(CommandReply.class), ReflectionUtils.getAnnotation(noArgsMethod, CommandReply.class))
-                .type(true);
-        return (ParentCommand) builder.build();
+                .build(DefaultCommand.class);
     }
 
-    @Nullable
-    ChildCommand convert(@NotNull BaseCommand baseCommand, @NotNull Method method) {
+    @Override
+    public @Nullable Command convert(@NotNull BaseCommand baseCommand, @NotNull Method method) {
         Annotation[] annotations = method.getAnnotations();
         if (annotations.length == 0) {
             return null;
@@ -70,15 +70,13 @@ final class CommandConverter {
             return null;
         }
 
-        CommandBuilder builder = CommandBuilder.newBuilder(baseCommand)
+        return CommandBuilder.newBuilder(baseCommand)
                 .executor(method)
                 .aliases(method.getAnnotation(Subcommand.class))
                 .usage(method.getAnnotation(CommandUsage.class))
                 .completions(method.getAnnotation(CommandCompletion.class))
                 .description(method.getAnnotation(CommandDescription.class))
                 .permission(method.getAnnotation(CommandPermission.class))
-                .reply(method.getAnnotation(CommandReply.class))
-                .type(false);
-        return (ChildCommand) builder.build();
+                .build(DefaultCommand.class);
     }
 }

@@ -24,61 +24,25 @@
 
 package com.github.kafeintr.commands.common.command;
 
+import com.github.kafeintr.commands.common.command.context.resolver.ContextResolver;
 import com.github.kafeintr.commands.common.component.SenderComponent;
-import com.github.kafeintr.commands.common.predicates.DefaultParameterPredicates;
-import com.github.kafeintr.commands.common.command.abstraction.AbstractCommand;
-import com.github.kafeintr.commands.common.command.abstraction.ParentCommand;
-import com.github.kafeintr.commands.common.command.context.CommandContextResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public interface CommandExecutor<T> {
-
-    default void execute(@NotNull CommandManager<T> manager, @NotNull ParentCommand command,
-                         @Nullable String subCommand, @Nullable T[] args, @NotNull SenderComponent sender,
-                         boolean argsIsRequired) {
-        if (subCommand == null || !command.findChild(subCommand).isPresent()) {
-            command.execute(sender, resolveContexts(manager.getContextResolver(), command, args, sender, argsIsRequired));
-        } else {
-            if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
-                sender.sendMessage(command.getPermissionMessage());
-                return;
-            }
-
-            command.findChild(subCommand).ifPresent(childCommand -> {
-                childCommand.execute(sender, resolveContexts(manager.getContextResolver(), childCommand, args, sender, argsIsRequired));
-            });
-        }
-    }
-
     @Nullable
-    default Object[] resolveContexts(@NotNull CommandContextResolver<T> resolver, @NotNull AbstractCommand command,
-                                     @Nullable T[] args, @NotNull SenderComponent sender, boolean argsIsRequired) {
-        Method executor = command.getExecutor();
+    default Object[] resolveContexts(@NotNull CommandManager<T> manager, @NotNull Command command,
+                                     @NotNull SenderComponent sender, @Nullable T[] args, boolean argsRequired) {
+        ContextResolver<T> resolver = manager.getContextResolver();
 
-        Parameter[] parameters = executor.getParameters();
-        if (argsIsRequired && (args == null || args.length != getAvailableArgumentSize(parameters))) {
+        Parameter[] parameters = command.getExecutor().getParameters();
+        if (argsRequired && (args == null || args.length < manager.calculateRequiredArgsCount(command))) {
             sender.sendMessage(command.getUsage());
             return null;
         }
 
-        return resolver.resolve(sender, parameters, args, argsIsRequired);
-    }
-
-    default int getAvailableArgumentSize(@NotNull Parameter[] parameters) {
-        int availableArgument = 0;
-        for (Parameter parameter : parameters) {
-            Class<?> type = parameter.getType();
-            if (DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type)) {
-                continue;
-            }
-
-            availableArgument++;
-        }
-
-        return availableArgument;
+        return resolver.resolve(sender, parameters, args);
     }
 }

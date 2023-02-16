@@ -28,7 +28,6 @@ import com.github.kafeintr.commands.common.command.completion.Completion;
 import com.github.kafeintr.commands.common.command.completion.CompletionProvider;
 import com.github.kafeintr.commands.common.component.SenderComponent;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.entity.HumanEntity;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,13 +35,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public final class BukkitCompletionProvider extends CompletionProvider {
-
     @Override
     public void initialize() {
         // Player
         register(new Completion("@players") {
             @Override
-            public List<String> getCompletions(@Nullable SenderComponent sender) {
+            public List<String> complete(@Nullable SenderComponent sender) {
                 return Bukkit.getOnlinePlayers().stream()
                         .map(HumanEntity::getName)
                         .collect(Collectors.toList());
@@ -52,9 +50,9 @@ public final class BukkitCompletionProvider extends CompletionProvider {
         // World
         register(new Completion("@worlds") {
             @Override
-            public List<String> getCompletions(@Nullable SenderComponent sender) {
-                return Bukkit.getWorlds().stream()
-                        .map(World::getName)
+            public List<String> complete(@Nullable SenderComponent sender) {
+                return Bukkit.getServer().getWorlds().stream()
+                        .map(world -> world.getName())
                         .collect(Collectors.toList());
             }
         });

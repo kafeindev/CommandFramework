@@ -22,32 +22,30 @@
  * SOFTWARE.
  */
 
-package com.github.kafeintr.commands.common.command.abstraction;
+package com.github.kafeintr.commands.common.command.context.resolver;
 
-import com.github.kafeintr.commands.common.command.BaseCommand;
-import com.github.kafeintr.commands.common.command.CommandAttribute;
-import com.github.kafeintr.commands.common.command.completion.RegisteredCompletion;
+import com.github.kafeintr.commands.common.command.context.provider.ContextProvider;
+import com.github.kafeintr.commands.common.component.SenderComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
-public final class ChildCommand extends AbstractCommand {
+public abstract class ContextResolver<T> {
+    @NotNull
+    private final ContextProvider<T> provider;
 
-    public ChildCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute,
-                        @Nullable RegisteredCompletion[] completions, boolean reply) {
-        super(baseCommand, attribute, completions, reply);
+    protected ContextResolver(@NotNull ContextProvider<T> provider) {
+        this.provider = provider;
+        this.provider.initialize();
     }
 
-    public ChildCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
-                        @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions,
-                        boolean reply) {
-        super(baseCommand, executor, attribute, completions, reply);
-    }
+    @Nullable
+    public abstract Object[] resolve(@NotNull SenderComponent sender, @Nullable Parameter[] parameters,
+                                     @Nullable T[] args);
 
-    @Override
-    public boolean isChild() {
-        return true;
+    @NotNull
+    public ContextProvider<T> getProvider() {
+        return this.provider;
     }
-
 }

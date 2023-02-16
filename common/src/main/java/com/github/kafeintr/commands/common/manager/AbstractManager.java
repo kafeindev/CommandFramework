@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public abstract class AbstractManager<K, V> implements Manager<K, V> {
-
     protected final Map<K, V> map = new HashMap<>();
 
     @Override
@@ -38,7 +37,7 @@ public abstract class AbstractManager<K, V> implements Manager<K, V> {
     }
 
     @Override
-    public Optional<V> find(@NotNull K key) {
+    public @NotNull Optional<V> find(@NotNull K key) {
         return Optional.ofNullable(this.map.get(key));
     }
 

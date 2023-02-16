@@ -35,7 +35,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface JDACommandCompletion {
-
     OptionType type();
 
     String name();
@@ -51,5 +50,4 @@ public @interface JDACommandCompletion {
     long max() default 100;
 
     ChannelType[] channelTypes() default {ChannelType.TEXT};
-
 }

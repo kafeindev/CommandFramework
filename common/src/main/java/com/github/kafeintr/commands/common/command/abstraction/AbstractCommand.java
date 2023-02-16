@@ -24,8 +24,9 @@
 
 package com.github.kafeintr.commands.common.command.abstraction;
 
-import com.github.kafeintr.commands.common.command.BaseCommand;
+import com.github.kafeintr.commands.common.command.Command;
 import com.github.kafeintr.commands.common.command.CommandAttribute;
+import com.github.kafeintr.commands.common.command.base.BaseCommand;
 import com.github.kafeintr.commands.common.command.completion.RegisteredCompletion;
 import com.github.kafeintr.commands.common.component.SenderComponent;
 import org.jetbrains.annotations.NotNull;
@@ -33,10 +34,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.*;
 
-public abstract class AbstractCommand {
-
+public abstract class AbstractCommand implements Command {
     @NotNull
     private final BaseCommand baseCommand;
 
@@ -49,27 +49,24 @@ public abstract class AbstractCommand {
     @Nullable
     private final RegisteredCompletion[] completions;
 
-    private final boolean reply;
+    private final List<String> parentCommands;
 
-    protected AbstractCommand(@NotNull BaseCommand baseCommand, @NotNull CommandAttribute attribute,
-                              @Nullable RegisteredCompletion[] completions, boolean reply) {
-        this(baseCommand, null, attribute, completions, reply);
-    }
+    private final Set<Command> subcommands;
 
     protected AbstractCommand(@NotNull BaseCommand baseCommand, @Nullable Method executor,
                               @NotNull CommandAttribute attribute, @Nullable RegisteredCompletion[] completions,
-                              boolean reply) {
+                              @Nullable List<String> parentCommands) {
         this.baseCommand = baseCommand;
         this.executor = executor;
         this.attribute = attribute;
         this.completions = completions;
-        this.reply = reply;
+        this.parentCommands = parentCommands == null ? new LinkedList<>() : parentCommands;
+        this.subcommands = new LinkedHashSet<>();
     }
 
-    public abstract boolean isChild();
-
+    @Override
     public void execute(@NotNull SenderComponent sender, @Nullable Object[] parameters) {
-        if (executor == null) {
+        if (this.executor == null) {
             sender.sendMessage(getUsage());
             return;
         } else if (getPermission() != null && !sender.hasPermission(getPermission())) {
@@ -79,29 +76,30 @@ public abstract class AbstractCommand {
 
         try {
             if (parameters != null) {
-                executor.invoke(this.baseCommand, parameters);
+                this.executor.invoke(this.baseCommand, parameters);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while executing command: " + getAliases()[0], e);
         }
     }
 
-    @NotNull
-    public BaseCommand getBaseCommand() {
+    @Override
+    public @NotNull BaseCommand getBaseCommand() {
         return this.baseCommand;
     }
 
-    @Nullable
-    public Method getExecutor() {
+    @Override
+    public @Nullable Method getExecutor() {
         return this.executor;
     }
 
-    @NotNull
-    public String[] getAliases() {
-        return this.attribute.getAliases();
+    @Override
+    public @NotNull CommandAttribute getAttribute() {
+        return this.attribute;
     }
 
-    public boolean containsAlias(String alias) {
+    @Override
+    public boolean containsAlias(@NotNull String alias) {
         for (String s : getAliases()) {
             if (s.equalsIgnoreCase(alias)) {
                 return true;
@@ -110,22 +108,86 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    @NotNull
-    public String getDescription() {
-        return this.attribute.getDescription();
+    @Override
+    public @NotNull List<String> getParentCommands() {
+        return this.parentCommands;
     }
 
-    @NotNull
-    public String getUsage() {
-        return this.attribute.getUsage();
+    @Override
+    public void putParentCommand(@NotNull String parent) {
+        getParentCommands().add(parent);
     }
 
-    @Nullable
-    public RegisteredCompletion[] getCompletions() {
+    @Override
+    public void putParentCommands(@NotNull List<String> parents) {
+        getParentCommands().addAll(parents);
+    }
+
+    @Override
+    public @NotNull Set<Command> getSubCommands() {
+        return this.subcommands;
+    }
+
+    @Override
+    public @NotNull Optional<Command> findSubCommand(@NotNull String sub) {
+        return getSubCommands().stream()
+                .filter(c -> c.containsAlias(sub))
+                .findFirst();
+    }
+
+    @Override
+    public @NotNull Optional<Command> findSubCommand(@NotNull String... subs) {
+        if (subs.length == 1) {
+            return findSubCommand(subs[0]);
+        } else {
+            String[] newSubs = new String[subs.length - 1];
+            System.arraycopy(subs, 1, newSubs, 0, subs.length - 1);
+            return findSubCommand(subs[0]).flatMap(c -> c.findSubCommand(newSubs));
+        }
+    }
+
+    @Override
+    public @NotNull Command forceFindSubCommand(@NotNull String... subs) {
+        if (subs.length == 1) {
+            return findSubCommand(subs[0]).orElse(this);
+        }
+
+        String[] newSubs = new String[subs.length - 1];
+        System.arraycopy(subs, 1, newSubs, 0, subs.length - 1);
+        return findSubCommand(subs[0])
+                .orElse(this)
+                .forceFindSubCommand(newSubs);
+    }
+
+    @Override
+    public void putSubCommand(@NotNull Command command) {
+        List<String> parents = command.getParentCommands();
+        if (parents.size() == 1 || parents.size() - 1 == getParentCommands().size()) {
+            getSubCommands().add(command);
+        } else {
+            String[] parentArray = Arrays.copyOfRange(parents.toArray(new String[0]), 1, parents.size());
+            findSubCommand(parentArray).ifPresent(c -> c.getSubCommands().add(command));
+        }
+    }
+
+    @Override
+    public void removeSubCommand(@NotNull Command command) {
+        List<String> parents = command.getParentCommands();
+        if (parents.size() == 1 || parents.size() - 1 == getParentCommands().size()) {
+            getSubCommands().remove(command);
+        } else {
+            String[] parentArray = Arrays.copyOfRange(parents.toArray(new String[0]), 1, parents.size());
+            findSubCommand(parentArray).ifPresent(c -> c.getSubCommands().remove(command));
+        }
+    }
+
+    @Override
+    public @Nullable RegisteredCompletion[] getCompletions() {
         return this.completions;
     }
 
-    public Optional<RegisteredCompletion> findCompletion(int index) {
+    @Override
+    public @NotNull Optional<RegisteredCompletion> findCompletion(int index) {
         if (this.completions == null) {
             return Optional.empty();
         }
@@ -135,21 +197,6 @@ public abstract class AbstractCommand {
                 return Optional.of(completion);
             }
         }
-
         return Optional.empty();
-    }
-
-    public boolean reply() {
-        return this.reply;
-    }
-
-    @Nullable
-    public String getPermission() {
-        return this.attribute.getPermission();
-    }
-
-    @NotNull
-    public String getPermissionMessage() {
-        return this.attribute.getPermissionMessage();
     }
 }

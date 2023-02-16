@@ -24,82 +24,137 @@
 
 package com.github.kafeintr.commands.common.command;
 
-import com.github.kafeintr.commands.common.command.abstraction.ChildCommand;
-import com.github.kafeintr.commands.common.command.abstraction.ParentCommand;
 import com.github.kafeintr.commands.common.command.annotation.Subcommand;
+import com.github.kafeintr.commands.common.command.base.BaseCommand;
 import com.github.kafeintr.commands.common.command.completion.Completion;
 import com.github.kafeintr.commands.common.command.completion.CompletionProvider;
 import com.github.kafeintr.commands.common.command.context.CommandContext;
-import com.github.kafeintr.commands.common.command.context.CommandContextProvider;
-import com.github.kafeintr.commands.common.command.context.CommandContextResolver;
+import com.github.kafeintr.commands.common.command.context.provider.ContextProvider;
+import com.github.kafeintr.commands.common.command.context.resolver.ContextResolver;
+import com.github.kafeintr.commands.common.command.convert.CommandConverter;
 import com.github.kafeintr.commands.common.reflect.ReflectionUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.lang.reflect.Parameter;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class CommandManager<T> {
+    protected final List<Command> commands = new LinkedList<>();
 
-    private final List<ParentCommand> commands = new ArrayList<>();
-
-    private final CommandConverter converter = new CommandConverter();
+    @NotNull
+    private final CommandConverter converter;
 
     @NotNull
     private final CompletionProvider completionProvider;
 
     @NotNull
-    private final CommandContextResolver<T> contextResolver;
+    private final ContextResolver<T> contextResolver;
 
-    protected CommandManager(@NotNull CompletionProvider completionProvider, @NotNull CommandContextProvider<T> contextProvider) {
+    protected CommandManager(@NotNull CommandConverter converter, @NotNull CompletionProvider completionProvider,
+                             @NotNull ContextResolver<T> contextResolver) {
+        this.converter = converter;
+        this.contextResolver = contextResolver;
+
         this.completionProvider = completionProvider;
         this.completionProvider.initialize();
-
-        contextProvider.initialize();
-        this.contextResolver = new CommandContextResolver<>(contextProvider);
     }
 
-    public Optional<ParentCommand> findCommand(@NotNull String alias) {
+    public abstract void initializeRegisteredCommand(@NotNull Command command);
+
+    public void registerCommand(@NotNull BaseCommand... baseCommands) {
+        for (BaseCommand baseCommand : baseCommands) {
+            Command command = this.converter.convert(baseCommand);
+            applySubCommands(baseCommand, command);
+
+            if (command.isSubCommand()) {
+                registerSubcommand(command);
+            } else {
+                registerCommand(command);
+            }
+        }
+    }
+
+    public void registerCommand(@NotNull Command command) {
+        initializeRegisteredCommand(command);
+
+        this.commands.add(command);
+    }
+
+    private void registerSubcommand(@NotNull Command command) {
+        Optional<Command> optionalParent = findCommand(command.getParentCommands().get(0));
+        if (!optionalParent.isPresent()) {
+            throw new IllegalStateException("Parent command not found for subcommand " + command.getAliases()[0]);
+        }
+
+        Command parent = optionalParent.get();
+        parent.putSubCommand(command);
+    }
+
+    private void applySubCommands(@NotNull BaseCommand baseCommand, @NotNull Command command) {
+        ReflectionUtils.getMethodsAnnotatedWith(baseCommand.getClass(), Subcommand.class, true).forEach(method -> {
+            Command subCommand = this.converter.convert(baseCommand, method);
+            if (subCommand == null) {
+                return;
+            }
+
+            if (!subCommand.isSubCommand()) {
+                subCommand.putParentCommands(command.getParentCommands());
+                subCommand.putParentCommand(command.getAliases()[0]);
+            }
+            updateUsage(subCommand);
+            command.putSubCommand(subCommand);
+        });
+    }
+
+    private void updateUsage(@NotNull Command command) {
+        if (!command.getAttribute().isUsingDefaultUsage()) {
+            return;
+        }
+
+        StringBuilder usage = new StringBuilder("/")
+                .append(command.getParentCommands().stream()
+                        .reduce((s, s2) -> s + " " + s2)
+                        .orElse(""))
+                .append(" ")
+                .append(command.getAliases()[0]);
+        for (int i = 0; i < calculateRequiredArgsCount(command); i++) {
+            usage.append(" <arg-").append(i).append(">");
+        }
+        command.getAttribute().setUsage(usage.toString());
+    }
+
+    public int calculateRequiredArgsCount(@NotNull Command command) {
+        int requiredArgsCount = 0;
+
+        for (Parameter parameter : command.getExecutor().getParameters()) {
+            Class<?> type = parameter.getType();
+            if (getContextProvider().isDefaultParameter(type)) {
+                continue;
+            }
+
+            requiredArgsCount++;
+        }
+        return requiredArgsCount;
+    }
+
+    @NotNull
+    public Optional<Command> findCommand(@NotNull String alias) {
         return this.commands.stream()
                 .filter(command -> command.containsAlias(alias))
                 .findFirst();
     }
 
-    public Optional<ParentCommand> findCommandByChildAliases(@NotNull String alias) {
-        return this.commands.stream()
-                .filter(command -> command.findChild(alias).isPresent())
-                .findFirst();
+    @NotNull
+    public Optional<Command> findCommand(@NotNull String alias, @NotNull String[] subs) {
+        Optional<Command> command = findCommand(alias);
+        return command.flatMap(parent -> parent.findSubCommand(subs));
     }
 
+    @NotNull
     public Optional<Completion> findCompletion(@NotNull String completion) {
         return this.completionProvider.find(completion);
-    }
-
-    public void registerCommand(@NotNull BaseCommand... baseCommands) {
-        for (BaseCommand baseCommand : baseCommands) {
-            ParentCommand command = this.converter.convert(baseCommand);
-
-            Optional<ParentCommand> existingCommand = findCommand(command.getAliases()[0]);
-            if (existingCommand.isPresent()) {
-                command = existingCommand.get();
-            }
-
-            for (Method method : ReflectionUtils.getMethodsAnnotatedWith(baseCommand.getClass(), Subcommand.class, true)) {
-                ChildCommand childCommand = this.converter.convert(baseCommand, method);
-                if (childCommand != null) {
-                    command.putChild(childCommand);
-                }
-            }
-
-            registerCommand(command);
-        }
-    }
-
-    public void registerCommand(@NotNull ParentCommand command) {
-        initializeRegisteredCommand(command);
-
-        this.commands.add(command);
     }
 
     public void registerCompletion(@NotNull Completion completion) {
@@ -110,15 +165,13 @@ public abstract class CommandManager<T> {
         getContextProvider().put(clazz, context);
     }
 
-    public abstract void initializeRegisteredCommand(@NotNull ParentCommand command);
-
     @NotNull
-    public CommandContextProvider<T> getContextProvider() {
+    public ContextProvider<T> getContextProvider() {
         return this.contextResolver.getProvider();
     }
 
     @NotNull
-    public CommandContextResolver<T> getContextResolver() {
+    public ContextResolver<T> getContextResolver() {
         return this.contextResolver;
     }
 

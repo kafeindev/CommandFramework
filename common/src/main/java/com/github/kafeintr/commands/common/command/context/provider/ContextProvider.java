@@ -22,20 +22,34 @@
  * SOFTWARE.
  */
 
-package com.github.kafeintr.commands.common.command.context;
+package com.github.kafeintr.commands.common.command.context.provider;
 
+import com.github.kafeintr.commands.common.command.context.CommandContext;
 import com.github.kafeintr.commands.common.component.SenderComponent;
 import com.github.kafeintr.commands.common.manager.AbstractManager;
+import org.jetbrains.annotations.NotNull;
 
-public abstract class CommandContextProvider<T> extends AbstractManager<Class<?>, CommandContext<T>> {
+import java.util.HashSet;
+import java.util.Set;
 
-    protected CommandContextProvider() {
-        put(String[].class, (sender, args, value, parameter) -> args);
+public abstract class ContextProvider<T> extends AbstractManager<Class<?>, CommandContext<T>> {
+    protected final Set<Class<?>> defaultParameterClasses = new HashSet<>();
+
+    public void initialize(){
+        // Default parameters
+        registerDefaultParameter(String[].class, (sender, args, value, parameter) -> args);
+        registerDefaultParameter(SenderComponent.class, (sender, args, value, parameter) -> sender);
+
         put(String.class, (sender, args, value, parameter) -> value);
-
-        put(SenderComponent.class, (sender, args, value, parameter) -> sender);
     }
 
-    public abstract void initialize();
+    public boolean isDefaultParameter(@NotNull Class<?> clazz) {
+        return this.defaultParameterClasses.contains(clazz);
+    }
 
+    public void registerDefaultParameter(@NotNull Class<?> clazz, @NotNull CommandContext<T> context) {
+        this.defaultParameterClasses.add(clazz);
+
+        put(clazz, context);
+    }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Kafein's CommandFramework
+ * Copyright (c) 2023 Kafein's CommandFramework
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,27 +22,24 @@
  * SOFTWARE.
  */
 
-package com.github.kafeintr.commands.common.command.context;
+package com.github.kafeintr.commands.common.command.context.resolver;
 
+import com.github.kafeintr.commands.common.command.context.CommandContext;
+import com.github.kafeintr.commands.common.command.context.provider.ContextProvider;
 import com.github.kafeintr.commands.common.component.SenderComponent;
-import com.github.kafeintr.commands.common.predicates.DefaultParameterPredicates;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Parameter;
 
-public final class CommandContextResolver<T> {
-
-    @NotNull
-    private final CommandContextProvider<T> provider;
-
-    public CommandContextResolver(@NotNull CommandContextProvider<T> provider) {
-        this.provider = provider;
+public final class DefaultContextResolver<T> extends ContextResolver<T> {
+    public DefaultContextResolver(@NotNull ContextProvider<T> provider) {
+        super(provider);
     }
 
-    @Nullable
-    public Object[] resolve(@NotNull SenderComponent sender, @NotNull Parameter[] parameters,
-                            @Nullable T[] args, boolean argsRequired) {
+    @Override
+    public @Nullable Object[] resolve(@NotNull SenderComponent sender, @Nullable Parameter[] parameters,
+                                      @Nullable T[] args) {
         Object[] result = new Object[parameters.length];
 
         int argIndex = 0;
@@ -50,32 +47,25 @@ public final class CommandContextResolver<T> {
             Parameter parameter = parameters[i];
             Class<?> type = parameter.getType();
 
-            CommandContext<T> context = this.provider.find(type)
-                    .orElseThrow(() -> new IllegalArgumentException("Cannot find context for type " + type.getName()));
-
-            if (argsRequired && (args == null || argIndex >= args.length)) {
-                return null;
-            }
-
             T arg = args != null && args.length > argIndex ? args[argIndex] : null;
             try {
-                Object handledContext = context.handle(sender, args, arg, parameter);
+                CommandContext<T> context = getProvider().find(type)
+                        .orElseThrow(() -> new IllegalArgumentException("Cannot find context for type " + type.getName()));
 
+                Object handledContext = context.handle(sender, args, arg, parameter);
+                if (handledContext == null) {
+                    return null;
+                }
                 result[i] = handledContext;
             } catch (NullPointerException e) {
                 result[i] = null;
             }
 
-            if (!(DefaultParameterPredicates.IS_DEFAULT_PARAMETER.test(type))) {
+            if (!(getProvider().isDefaultParameter(type))) {
                 argIndex++;
             }
         }
 
         return result;
-    }
-
-    @NotNull
-    public CommandContextProvider<T> getProvider() {
-        return this.provider;
     }
 }

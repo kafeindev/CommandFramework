@@ -25,22 +25,21 @@
 package com.github.kafeintr.commands.common.command;
 
 import com.github.kafeintr.commands.common.command.abstraction.AbstractCommand;
-import com.github.kafeintr.commands.common.command.abstraction.ChildCommand;
-import com.github.kafeintr.commands.common.command.abstraction.ParentCommand;
+import com.github.kafeintr.commands.common.command.base.BaseCommand;
 import com.github.kafeintr.commands.common.command.completion.RegisteredCompletion;
 import com.github.kafeintr.commands.common.command.misc.CommandAnnotationProcessor;
 import com.github.kafeintr.commands.common.command.misc.CommandPatternProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public final class CommandBuilder {
-
     @NotNull
-    static CommandBuilder newBuilder(@NotNull BaseCommand baseCommand) {
+    public static CommandBuilder newBuilder(@NotNull BaseCommand baseCommand) {
         return new CommandBuilder(baseCommand);
     }
 
@@ -56,6 +55,9 @@ public final class CommandBuilder {
     private RegisteredCompletion[] completions;
 
     @Nullable
+    private List<String> parents;
+
+    @Nullable
     private String usage;
 
     @Nullable
@@ -64,73 +66,117 @@ public final class CommandBuilder {
     @Nullable
     private String permission;
 
-    @UnknownNullability
     private String permissionMessage;
 
-    private boolean reply = true;
-
-    private boolean isParent;
+    private boolean reply;
 
     private CommandBuilder(@NotNull BaseCommand baseCommand) {
         this.baseCommand = baseCommand;
     }
 
-    public CommandBuilder type(boolean isParent) {
-        this.isParent = isParent;
-        return this;
-    }
-
+    @NotNull
     public CommandBuilder executor(@Nullable Method executor) {
         this.executor = executor;
         return this;
     }
 
+    @NotNull
+    public CommandBuilder parents(@Nullable List<String> parents) {
+        this.parents = parents;
+        return this;
+    }
+
+    @NotNull
+    public CommandBuilder parents(@Nullable Annotation... annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation == null) continue;
+
+            String value = CommandAnnotationProcessor.process(annotation);
+            if (value == null) continue;
+
+            this.parents = CommandPatternProcessor.processParents(value);
+        }
+        return this;
+    }
+
+    @NotNull
+    public CommandBuilder aliases(@Nullable String... aliases) {
+        this.aliases = aliases;
+        return this;
+    }
+
+    @NotNull
     public CommandBuilder aliases(@Nullable Annotation... annotations) {
         for (Annotation annotation : annotations) {
             if (annotation == null) continue;
 
-            final String value = CommandAnnotationProcessor.process(annotation);
+            String value = CommandAnnotationProcessor.process(annotation);
             if (value == null) continue;
 
             this.aliases = CommandPatternProcessor.processAlias(value);
         }
-
         return this;
     }
 
+    @NotNull
+    public CommandBuilder usage(@Nullable String usage) {
+        this.usage = usage;
+        return this;
+    }
+
+    @NotNull
     public CommandBuilder usage(@Nullable Annotation... annotations) {
         for (Annotation annotation : annotations) {
             if (annotation == null) continue;
 
             this.usage = CommandAnnotationProcessor.process(annotation);
         }
-
         return this;
     }
 
+    @NotNull
+    public CommandBuilder completions(@Nullable RegisteredCompletion... completions) {
+        this.completions = completions;
+        return this;
+    }
+
+    @NotNull
     public CommandBuilder completions(@Nullable Annotation... annotations) {
         for (Annotation annotation : annotations) {
             if (annotation == null) continue;
 
-            final String value = CommandAnnotationProcessor.process(annotation);
+            String value = CommandAnnotationProcessor.process(annotation);
             if (value == null) continue;
 
             this.completions = CommandPatternProcessor.processCompletion(value);
         }
-
         return this;
     }
 
+    @NotNull
+    public CommandBuilder description(@Nullable String description) {
+        this.description = description;
+        return this;
+    }
+
+    @NotNull
     public CommandBuilder description(@Nullable Annotation... annotations) {
         for (Annotation annotation : annotations) {
             if (annotation == null) continue;
 
             this.description = CommandAnnotationProcessor.process(annotation);
         }
-
         return this;
     }
 
+    @NotNull
+    public CommandBuilder permission(@Nullable String permission, @NotNull String permissionMessage) {
+        this.permission = permission;
+        this.permissionMessage = permissionMessage;
+        return this;
+    }
+
+    @NotNull
     public CommandBuilder permission(@Nullable Annotation... annotations) {
         for (Annotation annotation : annotations) {
             if (annotation == null) continue;
@@ -138,35 +184,24 @@ public final class CommandBuilder {
             this.permission = CommandAnnotationProcessor.process(annotation);
             this.permissionMessage = CommandAnnotationProcessor.process(annotation, "message", true);
         }
-
         return this;
     }
 
-    public CommandBuilder reply(@Nullable Annotation... annotations) {
-        for (Annotation annotation : annotations) {
-            if (annotation == null) continue;
-
-            this.reply = CommandAnnotationProcessor.process(annotation, "value", false);
-        }
-
-        return this;
-    }
-
-    private CommandAttribute buildAttribute() {
-        return CommandAttribute.of(
-                this.aliases,
-                this.usage,
-                this.description,
-                this.permission,
-                this.permissionMessage
+    @NotNull
+    public Command build(@NotNull Class<? extends AbstractCommand> commandClass) {
+        CommandAttribute attribute = CommandAttribute.of(
+                this.aliases, this.usage, this.description,
+                this.permission, this.permissionMessage
         );
-    }
 
-    public AbstractCommand build() {
-        CommandAttribute attribute = buildAttribute();
-
-        return this.isParent
-                ? new ParentCommand(this.baseCommand, this.executor, attribute, this.completions, this.reply)
-                : new ChildCommand(this.baseCommand, this.executor, attribute, this.completions, this.reply);
+        try {
+            return commandClass.getConstructor(BaseCommand.class, Method.class,
+                            CommandAttribute.class, RegisteredCompletion[].class, List.class)
+                    .newInstance(this.baseCommand, this.executor,
+                            attribute, this.completions, this.parents);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
+            throw new RuntimeException("Failed to create command", e);
+        }
     }
 }

@@ -22,23 +22,17 @@
  * SOFTWARE.
  */
 
-package com.github.kafeintr.commands.common.predicates;
+package com.github.kafeintr.commands.common.command.convert;
 
-import com.google.common.collect.ImmutableList;
-import com.github.kafeintr.commands.common.component.SenderComponent;
+import com.github.kafeintr.commands.common.command.Command;
+import com.github.kafeintr.commands.common.command.base.BaseCommand;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.function.Predicate;
+import java.lang.reflect.Method;
 
-public final class DefaultParameterPredicates {
+public interface CommandConverter {
+    @NotNull Command convert(@NotNull BaseCommand baseCommand);
 
-    private static final List<Class<?>> DEFAULT_PARAMETER_CLASSES = ImmutableList.of(
-            SenderComponent.class, String[].class
-    );
-
-    public static final Predicate<Class<?>> IS_DEFAULT_PARAMETER = clazz -> DEFAULT_PARAMETER_CLASSES.stream()
-            .anyMatch(defaultParameterClazz -> clazz.equals(defaultParameterClazz) || defaultParameterClazz.isAssignableFrom(clazz));
-
-    private DefaultParameterPredicates() {}
-
+    @Nullable Command convert(@NotNull BaseCommand baseCommand, @NotNull Method method);
 }

@@ -33,13 +33,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public class BukkitSenderComponent implements SenderComponent {
-
-    private UUID uuid;
+public final class BukkitSenderComponent implements SenderComponent {
+    @NotNull
+    public static BukkitSenderComponent from(@NotNull CommandSender sender) {
+        return new BukkitSenderComponent(sender);
+    }
 
     private final boolean isPlayer;
 
-    public BukkitSenderComponent(@NotNull CommandSender sender) {
+    private UUID uuid;
+
+    private BukkitSenderComponent(@NotNull CommandSender sender) {
         if (sender instanceof Player) {
             this.uuid = ((Player) sender).getUniqueId();
             this.isPlayer = true;
@@ -64,7 +68,7 @@ public class BukkitSenderComponent implements SenderComponent {
     @Override
     public void sendMessage(@NotNull String message) {
         isPlayer(() -> {
-            @Nullable Player player = Bukkit.getPlayer(this.uuid);
+            Player player = Bukkit.getPlayer(this.uuid);
             if (player != null) {
                 player.sendMessage(message);
             }
@@ -74,7 +78,7 @@ public class BukkitSenderComponent implements SenderComponent {
     @Override
     public boolean hasPermission(@NotNull String permission) {
         return isPlayer(() -> {
-            @Nullable Player player = Bukkit.getPlayer(this.uuid);
+            Player player = Bukkit.getPlayer(this.uuid);
             return player != null && player.hasPermission(permission);
         }, () -> true);
     }
@@ -82,7 +86,7 @@ public class BukkitSenderComponent implements SenderComponent {
     @Override
     public boolean isOnline() {
         return isPlayer(() -> {
-            @Nullable Player player = Bukkit.getPlayer(this.uuid);
+            Player player = Bukkit.getPlayer(this.uuid);
             return player != null && player.isOnline();
         }, () -> true);
     }

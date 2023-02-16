@@ -31,12 +31,9 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public interface SenderComponent {
+    @Nullable UUID getUniqueId();
 
-    @Nullable
-    UUID getUniqueId();
-
-    @Nullable
-    String getName();
+    @Nullable String getName();
 
     void sendMessage(@NotNull String message);
 
@@ -48,16 +45,15 @@ public interface SenderComponent {
 
     boolean isPlayer();
 
-    default void isPlayer(@NotNull Runnable runnable, @NotNull Runnable elseRunnable) {
+    default void isPlayer(@NotNull Runnable action1, @NotNull Runnable action2) {
         if (isPlayer()) {
-            runnable.run();
+            action1.run();
         } else {
-            elseRunnable.run();
+            action2.run();
         }
     }
 
-    default <T> T isPlayer(@NotNull Supplier<T> supplier, @NotNull Supplier<T> elseSupplier) {
-        return isPlayer() ? supplier.get() : elseSupplier.get();
+    default <T> T isPlayer(@NotNull Supplier<T> action1, @NotNull Supplier<T> action2) {
+        return isPlayer() ? action1.get() : action2.get();
     }
-
 }

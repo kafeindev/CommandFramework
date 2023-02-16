@@ -29,9 +29,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class Completion {
-
     @NotNull
     private final String name;
 
@@ -39,7 +39,19 @@ public abstract class Completion {
         this.name = name;
     }
 
-    public abstract List<String> getCompletions(@Nullable SenderComponent sender);
+    public abstract List<String> complete(@Nullable SenderComponent sender);
+
+    public List<String> complete(@Nullable SenderComponent sender, @NotNull String value) {
+        List<String> completions = complete(sender);
+
+        boolean match = !value.isEmpty();
+        if (match) {
+            completions = completions.stream()
+                    .filter(s -> s.startsWith(value) || s.equalsIgnoreCase(value))
+                    .collect(Collectors.toList());
+        }
+        return completions;
+    }
 
     @NotNull
     public String getName() {

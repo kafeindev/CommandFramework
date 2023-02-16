@@ -24,36 +24,22 @@
 
 package com.github.kafeintr.commands.jda;
 
+import com.github.kafeintr.commands.common.command.Command;
 import com.github.kafeintr.commands.common.command.CommandExecutor;
 import com.github.kafeintr.commands.common.command.CommandManager;
-import com.github.kafeintr.commands.common.command.abstraction.ChildCommand;
-import com.github.kafeintr.commands.common.command.abstraction.ParentCommand;
-import com.github.kafeintr.commands.common.command.completion.Completion;
-import com.github.kafeintr.commands.common.command.completion.RegisteredCompletion;
 import com.github.kafeintr.commands.jda.component.JDASenderComponent;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class JDACommandExecutor extends ListenerAdapter implements CommandExecutor<OptionMapping> {
     @NotNull
     private final CommandManager<OptionMapping> manager;
 
-    @NotNull
-    private final ParentCommand command;
-
-    public JDACommandExecutor(@NotNull CommandManager<OptionMapping> manager, @NotNull ParentCommand command) {
+    public JDACommandExecutor(@NotNull CommandManager<OptionMapping> manager) {
         this.manager = manager;
-        this.command = command;
     }
 
     @Override
@@ -64,56 +50,28 @@ public final class JDACommandExecutor extends ListenerAdapter implements Command
         }
 
         String commandName = event.getName();
-        if (!command.containsAlias(commandName)) return;
+        this.manager.findCommand(commandName).ifPresent(command -> {
+            JDASenderComponent senderComponent = new JDASenderComponent(member, event);
+            event.deferReply().setEphemeral(true).queue();
 
-        InteractionHook reply;
-        if (command.reply()) {
-            reply = event.deferReply().setEphemeral(true).complete();
-        }else {
-            reply = null;
-        }
+            OptionMapping[] args = event.getOptions().toArray(new OptionMapping[0]);
+            if (event.getSubcommandGroup() != null || event.getSubcommandName() != null) {
+                if (command.getPermission() != null && !senderComponent.hasPermission(command.getPermission())) {
+                    senderComponent.sendMessage(command.getPermissionMessage());
+                    return;
+                }
 
-        OptionMapping[] args = event.getOptions().toArray(new OptionMapping[0]);
-        execute(manager, command, event.getSubcommandName(), args, new JDASenderComponent(member, event, reply), false);
-    }
+                String[] subCommandArgs = event.getSubcommandGroup() != null
+                        ? new String[]{event.getSubcommandGroup(), event.getSubcommandName()}
+                        : new String[]{event.getSubcommandName()};
+                Command subCommand = command.forceFindSubCommand(subCommandArgs);
 
-    @Override
-    public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-        Member member = event.getMember();
-        if (member == null) {
-            return;
-        }
-
-        String commandName = event.getName();
-        if (!command.containsAlias(commandName)) return;
-
-        int index = event.getOptions().size();
-
-        Optional<RegisteredCompletion> optionalRegisteredCompletion;
-        if (event.getSubcommandName() == null) {
-            optionalRegisteredCompletion = command.findCompletion(index);
-        }else {
-            String subcommandName = event.getSubcommandName();
-
-            Optional<ChildCommand> childCommand = command.findChild(subcommandName);
-            if (!childCommand.isPresent()) {
-                return;
+                Object[] resolvedContexts = resolveContexts(manager, subCommand, senderComponent, args, false);
+                subCommand.execute(senderComponent, resolvedContexts);
+            } else {
+                Object[] resolvedContexts = resolveContexts(manager, command, senderComponent, args, false);
+                command.execute(senderComponent, resolvedContexts);
             }
-
-            optionalRegisteredCompletion = childCommand.get().findCompletion(index);
-        }
-
-        if (optionalRegisteredCompletion.isPresent()) {
-            Optional<Completion> optionalCompletion = manager.findCompletion(optionalRegisteredCompletion.get().getName());
-            if (optionalCompletion.isPresent()) {
-                Completion completion = optionalCompletion.get();
-
-                List<String> completions = completion.getCompletions(new JDASenderComponent(member, null, null));
-                event.replyChoices(completions.stream()
-                                .map(s -> new Command.Choice(s, s))
-                                .collect(Collectors.toList()))
-                        .queue();
-            }
-        }
+        });
     }
 }

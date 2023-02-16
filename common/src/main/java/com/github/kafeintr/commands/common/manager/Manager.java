@@ -30,11 +30,9 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface Manager<K, V> {
+    @NotNull Collection<V> findAll();
 
-    @NotNull
-    Collection<V> findAll();
-
-    Optional<V> find(@NotNull K key);
+    @NotNull Optional<V> find(@NotNull K key);
 
     V get(@NotNull K key);
 
@@ -47,5 +45,4 @@ public interface Manager<K, V> {
     boolean contains(@NotNull K key);
 
     int size();
-
 }

@@ -31,9 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Parameter;
 
 public interface CommandContext<T> {
-
     @Nullable
     Object handle(@NotNull SenderComponent sender, @Nullable T[] args,
-                  @Nullable T value, @NotNull Parameter parameter);
-
+                  @Nullable T value, @Nullable Parameter parameter);
 }

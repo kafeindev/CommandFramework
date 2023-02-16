@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Kafein's CommandFramework
+ * Copyright (c) 2023 Kafein's CommandFramework
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,27 +22,17 @@
  * SOFTWARE.
  */
 
-package com.github.kafeintr.commands.common.command.completion;
+package com.github.kafeintr.commands.common.command.annotation;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class RegisteredCompletion {
-    private final int index;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    @NotNull
-    private final String name;
-
-    public RegisteredCompletion(int index, @NotNull String name) {
-        this.index = index;
-        this.name = name;
-    }
-
-    public int getIndex() {
-        return this.index;
-    }
-
-    @NotNull
-    public String getName() {
-        return this.name;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface CommandParent {
+    @NotNull String value();
 }
