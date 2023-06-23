@@ -86,16 +86,13 @@ public final class JDACommandExecutor extends ListenerAdapter implements Command
             return;
         }
 
-        String subCommandGroup = event.getSubcommandGroup();
-        String subCommandName = event.getSubcommandName();
-        if (subCommandGroup == null && subCommandName == null) {
-            return;
-        }
-
         String commandName = event.getName();
         this.manager.findCommand(commandName).ifPresent(command -> {
-            Command targetCommand = subCommandGroup == null
-                    ? command.findSubCommand(subCommandName).orElse(null)
+            String subCommandGroup = event.getSubcommandGroup();
+            String subCommandName = event.getSubcommandName();
+
+            Command targetCommand = subCommandGroup == null && subCommandName == null ? command
+                    : subCommandGroup == null ? command.findSubCommand(subCommandName).orElse(null)
                     : command.findSubCommand(subCommandGroup, subCommandName).orElse(null);
             if (targetCommand == null) {
                 return;
