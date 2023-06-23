@@ -28,11 +28,15 @@ import com.github.kafeintr.commands.common.command.Command;
 import com.github.kafeintr.commands.common.command.CommandExecutor;
 import com.github.kafeintr.commands.common.command.CommandManager;
 import com.github.kafeintr.commands.jda.component.JDASenderComponent;
+import com.github.kafeintr.commands.jda.misc.JDAOptionProcessor;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public final class JDACommandExecutor extends ListenerAdapter implements CommandExecutor<OptionMapping> {
     @NotNull
@@ -72,6 +76,36 @@ public final class JDACommandExecutor extends ListenerAdapter implements Command
                 Object[] resolvedContexts = resolveContexts(manager, command, senderComponent, args, false);
                 command.execute(senderComponent, resolvedContexts);
             }
+        });
+    }
+
+    @Override
+    public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
+        Member member = event.getMember();
+        if (member == null) {
+            return;
+        }
+
+        String subCommandGroup = event.getSubcommandGroup();
+        String subCommandName = event.getSubcommandName();
+        if (subCommandGroup == null && subCommandName == null) {
+            return;
+        }
+
+        String commandName = event.getName();
+        this.manager.findCommand(commandName).ifPresent(command -> {
+            Command targetCommand = subCommandGroup == null
+                    ? command.findSubCommand(subCommandName).orElse(null)
+                    : command.findSubCommand(subCommandGroup, subCommandName).orElse(null);
+            if (targetCommand == null) {
+                return;
+            }
+
+            targetCommand.findCompletion(1).flatMap(registeredCompletion ->
+                    manager.findCompletion(registeredCompletion.getName())).ifPresent(c -> {
+                List<net.dv8tion.jda.api.interactions.commands.Command.Choice> choices = JDAOptionProcessor.resolveChoices(c.complete(null));
+                event.replyChoices(choices).queue();
+            });
         });
     }
 }

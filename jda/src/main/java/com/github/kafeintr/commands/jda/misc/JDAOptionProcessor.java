@@ -80,6 +80,7 @@ public final class JDAOptionProcessor {
                     completion.name(), completion.description(),
                     completion.required(), completion.autoComplete()
             );
+
             if (completion.type() == OptionType.NUMBER || completion.type() == OptionType.INTEGER) {
                 option.setMinValue(completion.min());
                 option.setMaxValue(completion.max());
@@ -87,17 +88,23 @@ public final class JDAOptionProcessor {
                 option.setChannelTypes(completion.channelTypes());
             }
 
-            command.findCompletion(i + 1).flatMap(registeredCompletion ->
-                    commandManager.findCompletion(registeredCompletion.getName())).ifPresent(c -> {
-                List<net.dv8tion.jda.api.interactions.commands.Command.Choice> choices = c.complete(null).stream()
-                        .map(s -> new net.dv8tion.jda.api.interactions.commands.Command.Choice(s, s))
-                        .collect(Collectors.toList());
-
-                option.addChoices(choices);
-            });
+            if (completion.type().canSupportChoices()) {
+                command.findCompletion(i + 1).flatMap(registeredCompletion ->
+                        commandManager.findCompletion(registeredCompletion.getName())).ifPresent(c -> {
+                    option.setAutoComplete(true);
+                    //option.addChoices(resolveChoices(c.complete(null)));
+                });
+            }
 
             optionData[i] = option;
         }
         return optionData;
+    }
+
+    @NotNull
+    public static List<net.dv8tion.jda.api.interactions.commands.Command.Choice> resolveChoices(@NotNull List<String> choices) {
+        return choices.stream()
+                .map(s -> new net.dv8tion.jda.api.interactions.commands.Command.Choice(s, s))
+                .collect(Collectors.toList());
     }
 }
