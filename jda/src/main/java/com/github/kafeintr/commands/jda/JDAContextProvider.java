@@ -24,9 +24,20 @@
 
 package com.github.kafeintr.commands.jda;
 
-import com.github.kafeintr.commands.jda.component.JDASenderComponent;
 import com.github.kafeintr.commands.common.command.context.provider.ContextProvider;
-import net.dv8tion.jda.api.entities.*;
+import com.github.kafeintr.commands.jda.component.JDASenderComponent;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.StageChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
@@ -43,19 +54,18 @@ public final class JDAContextProvider extends ContextProvider<OptionMapping> {
         put(Member.class, (sender, args, value, parameter) -> value.getAsMember());
         put(Role.class, (sender, args, value, parameter) -> value.getAsRole());
 
-        put(Channel.class, (sender, args, value, parameter) -> value.getAsGuildChannel());
-        put(GuildChannel.class, (sender, args, value, parameter) -> value.getAsGuildChannel());
+        put(Channel.class, (sender, args, value, parameter) -> value.getAsChannel());
+        put(GuildChannel.class, (sender, args, value, parameter) -> value.getAsChannel().asGuildMessageChannel());
 
-        put(MessageChannel.class, (sender, args, value, parameter) -> value.getAsMessageChannel());
-        put(GuildMessageChannel.class, (sender, args, value, parameter) -> value.getAsMessageChannel());
+        put(MessageChannel.class, (sender, args, value, parameter) -> value.getAsChannel().asGuildMessageChannel());
+        put(GuildMessageChannel.class, (sender, args, value, parameter) -> value.getAsChannel().asGuildMessageChannel());
 
-        put(TextChannel.class, (sender, args, value, parameter) -> value.getAsTextChannel());
-        put(NewsChannel.class, (sender, args, value, parameter) -> value.getAsNewsChannel());
-        put(ThreadChannel.class, (sender, args, value, parameter) -> value.getAsThreadChannel());
+        put(TextChannel.class, (sender, args, value, parameter) -> value.getAsChannel().asTextChannel());
+        put(NewsChannel.class, (sender, args, value, parameter) -> value.getAsChannel().asNewsChannel());
+        put(ThreadChannel.class, (sender, args, value, parameter) -> value.getAsChannel().asThreadChannel());
 
-        put(AudioChannel.class, (sender, args, value, parameter) -> value.getAsAudioChannel());
-        put(VoiceChannel.class, (sender, args, value, parameter) -> value.getAsVoiceChannel());
-        put(StageChannel.class, (sender, args, value, parameter) -> value.getAsStageChannel());
+        put(AudioChannel.class, (sender, args, value, parameter) -> value.getAsChannel().asAudioChannel());
+        put(StageChannel.class, (sender, args, value, parameter) -> value.getAsChannel().asStageChannel());
 
         put(String.class, (sender, args, value, parameter) -> value.getAsString());
 

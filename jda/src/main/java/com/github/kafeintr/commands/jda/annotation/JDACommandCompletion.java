@@ -24,7 +24,7 @@
 
 package com.github.kafeintr.commands.jda.annotation;
 
-import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.lang.annotation.ElementType;

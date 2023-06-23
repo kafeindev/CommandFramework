@@ -25,13 +25,14 @@
 package com.github.kafeintr.commands.jda.component;
 
 import com.github.kafeintr.commands.common.component.SenderComponent;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,7 +70,11 @@ public final class JDASenderComponent implements SenderComponent {
         getReply().setEphemeral(ephemeral).editOriginal(message).queue();
     }
 
-    public void sendMessage(@NotNull Message message, boolean ephemeral) {
+    public void sendMessage(@NotNull EmbedBuilder message, boolean ephemeral) {
+        getReply().setEphemeral(ephemeral).editOriginalEmbeds(message.build()).queue();
+    }
+
+    public void sendMessage(@NotNull MessageEditData message, boolean ephemeral) {
         getReply().setEphemeral(ephemeral).editOriginal(message).queue();
     }
 
@@ -89,8 +94,8 @@ public final class JDASenderComponent implements SenderComponent {
     }
 
     @NotNull
-    public TextChannel getChannel() {
-        return event.getTextChannel();
+    public MessageChannel getChannel() {
+        return event.getMessageChannel();
     }
 
     @Override
