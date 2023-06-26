@@ -8,8 +8,8 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'com.github.johnrengelman.shadow'
 
-    group 'com.github.kafeintr.commands'
-    version '1.2.9'
+    group 'com.github.kafeindev.commands'
+    version '1.3.0'
 
     sourceCompatibility = 8
     targetCompatibility = 8
